@@ -38,31 +38,31 @@ class Neo_Chat():
     def __init__(self):
 	global client_speak
         rospy.Subscriber('listened', String, self.listen_callback)
-        client_speak = rospy.ServiceProxy("/say_fr1", Text2Speach)
+        client_speak = rospy.ServiceProxy("/say_en1", Text2Speach)
         rospy.init_node('neo_chat_node', anonymous=True)
         self.NEO = aiml.Kernel()# charge le moteur de l'IA
         self.brainLoaded = False
         self.forceReload = False
 
 	# Données personnelles du robot, comme son nom, ses préférences...
-        self.NEO.setBotPredicate('name', "Neio")
-        self.NEO.setBotPredicate('age' ,"12 ans")
-        self.NEO.setBotPredicate('anniversaire', "octobre 2014")
-        self.NEO.setBotPredicate('gender', "garsson")
-        self.NEO.setBotPredicate('master', "Vincent")
-        self.NEO.setBotPredicate('favoritebook', "ROS par l'exemple")
+        self.NEO.setBotPredicate('name', "Tutino")
+        self.NEO.setBotPredicate('age' ,"18 years old")
+        self.NEO.setBotPredicate('compleanno', "october 2015")
+        self.NEO.setBotPredicate('gender', "male")
+        self.NEO.setBotPredicate('master', "Marco")
+        self.NEO.setBotPredicate('favoritebook', "Do androids dream of electronic ships")
         self.NEO.setBotPredicate('favcolor', "bleu")
-        self.NEO.setBotPredicate('location' ,"France, dans l'Eure")
+        self.NEO.setBotPredicate('location' ,"Turin")
         self.NEO.setBotPredicate('sign', "taureau")
-        self.NEO.setBotPredicate('favoritefood', "les ampères")
-        self.NEO.setBotPredicate('favmovie', "Les temps modernes")
-        self.NEO.setBotPredicate('favoriteband', "aucune")
-        self.NEO.setBotPredicate('kindmusic', "aucune")
-        self.NEO.setBotPredicate('birthplace' ,"France, dans l'Eure")
+        self.NEO.setBotPredicate('favoritefood', "circuits")
+        self.NEO.setBotPredicate('favmovie', "Modern times")
+        self.NEO.setBotPredicate('favoriteband', "rush")
+        self.NEO.setBotPredicate('kindmusic', "electronic")
+        self.NEO.setBotPredicate('birthplace' ,"Italy, turin tech")
 
         while not self.brainLoaded:
 	    if self.forceReload or (len(sys.argv) >= 2 and sys.argv[1] == "reload"):
-		    self.NEO.bootstrap(learnFiles="/home/neo/catkin_ws/src/qbo_ai/ai_fr/*.aiml")# charge tous les fichiers aiml
+		    self.NEO.bootstrap(learnFiles="/home/neo/catkin_ws/src/qbo_ai/ai_en/*.aiml")# charge tous les fichiers aiml
 		    self.brainLoaded = True
 		    # backup des differents fichiers aiml dans un fichier compressé, pour un chargement éclair les fois suivantes
 		    self.NEO.saveBrain("/home/neo/catkin_ws/src/qbo_ai/NEO.brn")
@@ -76,7 +76,7 @@ class Neo_Chat():
 			    self.forceReload = True
 
             while True:
-	        reponse = self.NEO.respond(raw_input("posez votre question : "))# A commenter pour tester la reco. vocale
+	        reponse = self.NEO.respond(raw_input("Ask me something : "))# A commenter pour tester la reco. vocale
 	        #reponse = self.NEO.respond(msg.data)# récupère la séquence ententue via qbo_listen et interroge le moteur d'IA
                 speak_this(reponse)# si une réponse est trouvée, elle est exécutée oralement
 	        print "réponse : ",reponse
