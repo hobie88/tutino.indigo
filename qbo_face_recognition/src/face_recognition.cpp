@@ -26,7 +26,7 @@
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
-#include <face_recognition/FaceRecognitionAction.h>
+#include <qbo_face_recognition/FaceRecognitionAction.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
