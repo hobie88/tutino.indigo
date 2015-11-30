@@ -49,4 +49,10 @@ You will find on config rep. some files needed for pocketsphinx, for orders reco
 
  rename as <same_as_existing>.dic, and <same_as_existing>.lm and put them in config rep.
 
+###########################################################################################
+MARCO - installed: 
+    python-pocketsphinx
+    pocketsphinx-hmm-wsj1
+    pocketsphinx-lm-wsj
 
+http://cmusphinx.sourceforge.net/wiki/tutorialpocketsphinx
