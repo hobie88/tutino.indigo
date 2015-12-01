@@ -40,9 +40,12 @@ class recognizer(object):
 
         rospy.init_node("qbo_listen")
         config = ps.Decoder.default_config()
-        config.set_string('-hmm', path.join(MODELDIR, 'en-us/en-us'))
-        config.set_string('-lm', path.join(MODELDIR, 'en-us/en-us.lm.bin'))
-        config.set_string('-dict', path.join(MODELDIR, 'en-us/cmudict-en-us.dict'))
+        #config.set_string('-hmm', path.join(MODELDIR, 'en-us/en-us'))
+        #config.set_string('-lm', path.join(MODELDIR, 'en-us/en-us.lm.bin'))
+        #config.set_string('-dict', path.join(MODELDIR, 'en-us/cmudict-en-us.dict'))
+        config.set_string('-hmm', path.join(MODELDIR, 'it/it'))
+        config.set_string('-lm', path.join(MODELDIR, 'it/it/6475.lm.bin'))
+        config.set_string('-dict', path.join(MODELDIR, 'it/6475.dic'))
 
         while not rospy.is_shutdown():
 
@@ -88,8 +91,10 @@ class recognizer(object):
                                      
                     else:
                         break
-                speechRec.end_utt()
+                
+                #result = speechRec.hyp().hypstr
                 result = speechRec.hyp()
+                speechRec.end_utt()
                 return result 
 
             recognised = decodeSpeech(config,audio_file)
