@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>face_recognition</name>
+  <name>qbo_face_recognition</name>
   <version>0.0.0</version>
   <description>A ROS package for face recognition in video stream.
 Face recognition is performed using Eigenfaces (also called "Principal Component Analysis" or PCA) by utilizing the c++ source code provided by Shervin Emami (http://www.shervinemami.info/faceRecognition.html)</description>

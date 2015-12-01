@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(face_recognition)
+project(qbo_face_recognition)
 
 # We thank David Portugal [<davidbsp@citard-serv.com>](mailto://avidbsp@citard-serv.com) for providing Catkinization 
 # and Maciej Zurad [<maciej.zurad@gmail.com>](mailto://maciej.zurad@gmail.com) for bug fixes.
@@ -112,7 +112,7 @@ include_directories(
 )
 
 ## Declare cpp libraries: 
-add_library(face_recognition_lib src/face_recognition_lib.cpp)
+add_library(qbo_face_recognition_lib src/face_recognition_lib.cpp)
 
 ## Declare a cpp executable
 add_executable(Fserver src/face_recognition.cpp)
@@ -121,7 +121,7 @@ add_executable(Fclient src/face_rec_client.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 
-add_dependencies(Fclient face_recognition_generate_messages_cpp)
+add_dependencies(Fclient qbo_face_recognition_generate_messages_cpp)
 
 add_dependencies(Fserver ${catkin_EXPORTED_TARGETS})
 add_dependencies(Fclient ${catkin_EXPORTED_TARGETS})
