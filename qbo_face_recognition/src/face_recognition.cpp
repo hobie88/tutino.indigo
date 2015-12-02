@@ -83,7 +83,7 @@ public:
   }
 
 
-  void executeCB(const face_recognition::FaceRecognitionGoalConstPtr &goal)
+  void executeCB(const qbo_face_recognition::FaceRecognitionGoalConstPtr &goal)
   {
     //check to be sure if the goal should be still persuaded
     if( as_.isPreemptRequested() || ros::isShuttingDown() )
@@ -380,8 +380,8 @@ protected:
   boost::mutex mutex_; //for synchronization between executeCB and imageCB
   std::string goal_argument_; 
   int goal_id_;
-  face_recognition::FaceRecognitionFeedback feedback_; 
-  face_recognition::FaceRecognitionResult result_;
+  qbo_face_recognition::FaceRecognitionFeedback feedback_; 
+  qbo_face_recognition::FaceRecognitionResult result_;
   int add_face_count; //help variable to count the number of training images already taken in the add_face_images goal
   FILE *trainFile; 
   double confidence_value;//a face recognized with confidence value higher than confidence_value threshold is accepted as valid.
@@ -394,15 +394,15 @@ protected:
   FaceRecognitionLib frl; 
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
-  actionlib::SimpleActionServer<face_recognition::FaceRecognitionAction> as_;
+  actionlib::SimpleActionServer<qbo_face_recognition::FaceRecognitionAction> as_;
   int person_number;     //the number of persons in the train file (train.txt)
 };
 
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "face_recognition");
-  FaceRecognition face_recognition(ros::this_node::getName());
+  ros::init(argc, argv, "qbo_face_recognition");
+  FaceRecognition qbo_face_recognition(ros::this_node::getName());
   ros::spin();
   return 0;
 }
