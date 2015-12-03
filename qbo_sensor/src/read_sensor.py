@@ -6,8 +6,9 @@ from sensor_msgs.msg import PointCloud
 from std_msgs.msg import Float32 
 
 wall_distance = 0.3
-left_distance =1.1
-right_distance=2.2
+left_distance = 0.0
+right_distance = 0.0
+count = 0
 
 class read_sensor:
 
@@ -35,6 +36,9 @@ class read_sensor:
         global right_distance 
         right_distance = data.points[0].x
         print 'RIGHT SENSOR = ' + str(data.points[0].x)
+        global count
+        count = count +1
+        print 'COUNT = ' + str(count)
         
         
 if __name__ == '__main__':

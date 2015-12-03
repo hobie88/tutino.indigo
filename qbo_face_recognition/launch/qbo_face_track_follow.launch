@@ -23,7 +23,7 @@
 
 
 	 <!-- launch_recognition Fserver-->
-  <node pkg="qbo_face_recognition"  name="face_recognition" type="Fserver" output="screen" >
+  <node pkg="qbo_face_recognition"  name="qbo_face_recognition" type="Fserver" output="screen" >
    
    
    <param name="confidence_value" value="0.90"/>

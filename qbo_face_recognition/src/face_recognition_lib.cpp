@@ -34,7 +34,7 @@
 
 using namespace std;
 static const char *faceCascadeFilename = "haarcascade_frontalface_alt.xml";   // Haar Cascade file, used for Face Detection.
-const std::string path = ros::package::getPath("face_recognition"); 	//D.Portugal => get pkg path
+const std::string path = ros::package::getPath("qbo_face_recognition"); 	//D.Portugal => get pkg path
 //#define USE_MAHALANOBIS_DISTANCE	// You might get better recognition accuracy if you enable this.
 class FaceRecognitionLib
 {
