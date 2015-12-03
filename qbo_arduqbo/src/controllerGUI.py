@@ -120,7 +120,7 @@ class controllerGUI(wx.Frame):
         dc.DrawCircle((width/2) + self.X*(width/2), (width/2) - self.Y*(width/2), 5)  
 
     def onMove(self, event=None):
-        if event.LeftIsDown():        
+        if event.LeftIsDown():       
             pt = event.GetPosition()
             if pt[0] > 0 and pt[0] < width and pt[1] > 0 and pt[1] < width:
                 self.forward = ((width/2)-pt[1])/2
