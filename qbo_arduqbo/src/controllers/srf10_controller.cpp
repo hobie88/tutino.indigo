@@ -45,8 +45,8 @@ CDistanceSensor::CDistanceSensor(std::string name, uint8_t address, std::string 
 
 void CDistanceSensor::publish(unsigned int readValue, ros::Time time)
 {
-    float distance=0;
-    if(type_.compare("srf10")==0)
+    float distance=0;                
+    if(type_.compare("srf10")==0)       //Sensori a ultrasuoni anteriori laterali
     {
         distance=((float)readValue)/100;
     }
@@ -61,7 +61,7 @@ void CDistanceSensor::publish(unsigned int readValue, ros::Time time)
         else
             distance=(6787.0 /((float)readValue - 3.0)) - 4.0;
     }
-    else if(type_.compare("GP2Y0A21YK")==0)
+    else if(type_.compare("GP2Y0A21YK")==0)     //Sensore a infrarossi anteriore centrale
     {
        distance = (12343.85 * pow((float)readValue,-1.15))/100.0;
     }
@@ -237,7 +237,7 @@ void CSrf10Controller::timerCallback(const ros::TimerEvent& e)
             for (int i=0;i<adcSensorsAddresses_.size();i++)
             {
                 ROS_DEBUG_STREAM("Obtained distance " << adcReads[i] << " for adc sensor " << adcSensors_[adcSensorsAddresses_[i]]->getName() << " from the base control board");
-                adcSensors_[adcSensorsAddresses_[i]]->publish(adcReads[i],now);
+                adcSensors_[adcSensorsAddresses_[i]]->publish(adcReads[i],now);     //Sensore a infrarossi anteriore centrale
             }
         }
     }

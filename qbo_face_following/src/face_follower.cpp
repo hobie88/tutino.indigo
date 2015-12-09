@@ -50,10 +50,13 @@ void FaceFollower::setROSParams()
 	private_nh_.param("/qbo_face_following/search_min_pan", search_min_pan_, -0.3);
 	private_nh_.param("/qbo_face_following/search_max_pan", search_max_pan_, 0.3);
 	private_nh_.param("/qbo_face_following/search_pan_vel", search_pan_vel_, 0.3);
-	private_nh_.param("/qbo_face_following/search_max_tilt", search_max_tilt_, 0.7);
-	private_nh_.param("/qbo_face_following/search_min_tilt", search_min_tilt_, 0.7);
+	//private_nh_.param("/qbo_face_following/search_max_tilt", search_max_tilt_, 0.7);
+	//private_nh_.param("/qbo_face_following/search_min_tilt", search_min_tilt_, 0.7);
+	private_nh_.param("/qbo_face_following/search_max_tilt", search_max_tilt_, 0.5);
+	private_nh_.param("/qbo_face_following/search_min_tilt", search_min_tilt_, 0.5);
 	private_nh_.param("/qbo_face_following/search_tilt_vel", search_tilt_vel_, 0.3);
 	private_nh_.param("/qbo_face_following/desired_distance", desired_distance_, 1.0);
+	//private_nh_.param("/qbo_face_following/desired_distance", desired_distance_, 5.0);
 	private_nh_.param("/qbo_face_following/send_stop", send_stop_, true);
 }
 
@@ -93,6 +96,7 @@ void FaceFollower::onInit()
 	//TODO - Read from rosparam server this value
 	min_pitch_ = -0.5;
 
+
 	//TODO - Should be ROS parameters
 	/*
 	 * Setting PIDs values
@@ -114,12 +118,15 @@ void FaceFollower::onInit()
 	kd_v_=0.001;
 
 	//For base's linear movement
+	ros::Time delta;
+	ros::Time T;
 	distance_act_=0;
 	distance_prev_=0;
 	diff_distance_=0;
-	kp_distance_=0.3;
+	//kp_distance_=0.3;
+	kp_distance_=0.02;
 	ki_distance_=0;
-	kd_distance_=0.1;
+	kd_distance_=0.001;
 
 	//For base's angular movement
 	yaw_act_=0;
@@ -143,11 +150,17 @@ void FaceFollower::jointStateCallback(const sensor_msgs::JointStateConstPtr& joi
         ROS_ERROR("Malformed JointState message has arrived. Names size and positions size do not match");
         return;
     }
+    for (int j=0;j<(int)joint_state->position.size();j++)
+    {
+	//ROS_INFO("**********Position %d: %f",j,joint_state->position[j]);
+    }
     for (int i=0;i<(int)joint_state->name.size();i++)
     {
         if (joint_state->name[i].compare("head_pan_joint")==0)
         {
         	yaw_from_joint_=joint_state->position[i];
+		
+		//ROS_INFO("********* head pan joint: %f",yaw_from_joint_);
         	//std::cout << "Mensaje pan: " <<  yaw_from_joint_ << std::endl;
         }
         if (joint_state->name[i].compare("head_tilt_joint")==0)
@@ -233,7 +246,10 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		float linear_vel = 0;
 		float angular_vel = 0;
 
+		
+		//ROS_INFO("*******distance to head: %f",head_pos_size->distance_to_head);
 		distance_act_ = head_pos_size->distance_to_head-desired_distance_;
+		T=ros::Time::now();
 		diff_distance_=distance_act_-distance_prev_;
 		linear_vel=controlPID(distance_act_,0,diff_distance_,kp_distance_,ki_distance_,kd_distance_);
 		distance_prev_=distance_act_;
@@ -270,8 +286,19 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 //		else
 //			angular_vel=0;
 
-
-		//ROS_INFO("Moving base: linear velocity: %lg, angular vel: %lg",linear_vel,angular_vel);
+		//linear_vel=linear_vel/10;
+/******************************
+		if(linear_vel!=linear_vel)
+		{
+			 linear_vel=0.0;
+			ROS_INFO("*********** Linear_vel is NaN");
+		}
+		else
+		{
+			ROS_INFO("--------- Linear_vel is not a Nan");
+		}
+*****************************/
+		ROS_INFO("++++++++Moving base: linear velocity: %lg, angular vel: %lg",linear_vel,angular_vel);
 		sendVelocityBase(linear_vel,angular_vel);
 
 
@@ -432,7 +459,7 @@ float FaceFollower::controlPID(float x, float ix, float dx, float Kp, float Ki, 
 {
 	float result;
 	result=Kp*x+Ki*ix+Kd*dx;
-	return result;
+	return result*0.1;
 }
 
 /*

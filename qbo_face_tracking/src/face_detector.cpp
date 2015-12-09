@@ -70,7 +70,7 @@ void FaceDetector::setROSParams()
 	//Setting default path of the Haar cascade classifier
 	string default_classifier_path = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml";
         //string alternative_classifier_path = "/usr/share/OpenCV-2.3.1/haarcascades/haarcascade_profileface.xml";
-        string alternative_classifier_path = "none";
+        string alternative_classifier_path = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
 
 	//Set default parameter for face classifier path
 	private_nh_.param("/qbo_face_tracking/face_classifier_path", face_classifier_path_, default_classifier_path);
@@ -223,6 +223,7 @@ void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 {
 	if(p_.data==NULL)
 	{
+	    ROS_INFO("CameraInfo callback");
 		cv::Mat p=cv::Mat(3,4,CV_64F);
 		for (int i=0;i<3;i++)
 		{
@@ -236,7 +237,8 @@ void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 		/*
 		 * Subscribing to image node
 		 */
-		image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_rect_color",1,&FaceDetector::imageCallback, this);
+		//image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_rect_color",1,&FaceDetector::imageCallback, this);
+		image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_raw",1,&FaceDetector::imageCallback, this);
 
 		//TODO - Unsubscribe to the camera info topic
 	}

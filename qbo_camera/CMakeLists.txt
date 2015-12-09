@@ -7,7 +7,7 @@ project(qbo_camera)
 #find_package(catkin REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  #opencv
+#  opencv
   cv_bridge
   sensor_msgs
   image_transport
@@ -91,7 +91,7 @@ find_package(catkin REQUIRED
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES qbo_camera
-  CATKIN_DEPENDS   roscpp cv_bridge sensor_msgs image_transport camera_calibration_parsers uvc_camera cv_bridge
+#  CATKIN_DEPENDS   roscpp cv_bridge sensor_msgs image_transport camera_calibration_parsers uvc_camera cv_bridge
 #  DEPENDS system_lib
 )
 
@@ -131,6 +131,11 @@ add_dependencies(stereo_calib src/default.xml)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(stereo_calib ${catkin_LIBRARIES})
+
+#add_executable(video_streamer src/video_streamer.cpp)
+#target_link_libraries(video_streamer ${catkin_LIBRARIES})
+
+
 
 #############
 ## Install ##

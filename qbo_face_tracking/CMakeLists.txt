@@ -8,12 +8,16 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   #opencv2
+#  OpenCv
   qbo_arduqbo
   qbo_face_msgs
 #  qbo_face_recognition
   roscpp
   sensor_msgs
 )
+#find_package(catkin REQUIRED
+#	OpenCV
+#)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -111,6 +115,7 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(qbo_face_tracking_node src/qbo_face_tracking_node.cpp)
 add_executable(qbo_face_tracking src/face_detector.cpp)
+add_executable(streamer src/video_streamer.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(qbo_face_tracking_node qbo_face_tracking_generate_messages_cpp)
@@ -119,6 +124,7 @@ add_executable(qbo_face_tracking src/face_detector.cpp)
  target_link_libraries(qbo_face_tracking
    ${catkin_LIBRARIES}
 )
+target_link_libraries(streamer ${catkin_LIBRARIES})
 
 #############
 ## Install ##

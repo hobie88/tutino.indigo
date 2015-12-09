@@ -4,12 +4,13 @@ import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import PointCloud
 from std_msgs.msg import Float32 
+from decimal import Decimal
 
 wall_distance = 0.3
 left_distance = 0.0
 right_distance = 0.0
 count = 0
-
+float
 class read_sensor:
 
     def __init__(self):
@@ -30,7 +31,7 @@ class read_sensor:
     def leftSensorCallback(self, data):
         global left_distance
         left_distance = data.points[0].x
-        print 'LEFT SENSOR = ' + str(data.points[0].x)
+        print 'LEFT SENSOR = ' + str(Decimal(data.points[0].x*100))
         
     def rightSensorCallback(self, data):
         global right_distance 
