@@ -9,7 +9,7 @@
 	<!-- Face Following node to move head and base (Pan = L/R ; Tilt = U/D) -->
 	<node name="qbo_face_following" pkg="qbo_face_following" type="qbo_face_following">
 	</node>  
-	 <param name="/qbo_face_following/move_base" value="false" />
+	 <param name="/qbo_face_following/move_base" value="true" />
 	 <param name="/qbo_face_following/move_head" value="true
 " />
 	 <param name="/qbo_face_tracking/send_stop"  value="true" />

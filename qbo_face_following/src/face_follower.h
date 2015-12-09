@@ -33,7 +33,7 @@
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/SetCameraInfo.h>
-
+#include <exception>
 
 #include <qbo_face_msgs/FacePosAndDist.h>
 
@@ -108,6 +108,7 @@ private:
 	float kp_distance_;
 	float ki_distance_;
 	float kd_distance_;
+	float max_linear_speed_;
 
 	//For base's angular movement
 	float yaw_prev_;
@@ -116,6 +117,7 @@ private:
 	float kp_yaw_;
 	float ki_yaw_;
 	float kd_yaw_;
+	float max_angular_speed_;
 
 	/*
 	 * Callbacks

@@ -111,6 +111,8 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(qbo_face_following src/face_follower.cpp)
+add_executable(speed_checker src/speed_checker.cpp)
+
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -120,6 +122,8 @@ add_executable(qbo_face_following src/face_follower.cpp)
  target_link_libraries(qbo_face_following
    ${catkin_LIBRARIES}
  )
+
+target_link_libraries(speed_checker ${catkin_LIBRARIES})
 
 #############
 ## Install ##

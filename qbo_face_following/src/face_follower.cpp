@@ -23,6 +23,7 @@
 
 #include "face_follower.h"
 
+
 FaceFollower::FaceFollower()
 {
 	ROS_INFO("Initializing Qbo face following");
@@ -118,15 +119,16 @@ void FaceFollower::onInit()
 	kd_v_=0.001;
 
 	//For base's linear movement
-	ros::Time delta;
-	ros::Time T;
+	//ros::Time delta;
+	//ros::Time T;
 	distance_act_=0;
 	distance_prev_=0;
 	diff_distance_=0;
-	//kp_distance_=0.3;
-	kp_distance_=0.02;
+	kp_distance_=0.3;
+	//kp_distance_=0.02;
 	ki_distance_=0;
 	kd_distance_=0.001;
+//	max_linear_speed_=0.001;
 
 	//For base's angular movement
 	yaw_act_=0;
@@ -135,6 +137,7 @@ void FaceFollower::onInit()
 	kp_yaw_=1.3;
 	ki_yaw_=0;
 	kd_yaw_=0.0;
+//	max_angular_speed_=0.001;
 
 	/*
 	 * Initialize values
@@ -248,8 +251,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 
 		
 		//ROS_INFO("*******distance to head: %f",head_pos_size->distance_to_head);
-		distance_act_ = head_pos_size->distance_to_head-desired_distance_;
-		T=ros::Time::now();
+		distance_act_ = (head_pos_size->distance_to_head)-desired_distance_;
 		diff_distance_=distance_act_-distance_prev_;
 		linear_vel=controlPID(distance_act_,0,diff_distance_,kp_distance_,ki_distance_,kd_distance_);
 		distance_prev_=distance_act_;
@@ -448,19 +450,48 @@ void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 	velocidad_base.angular.y=0;
 	velocidad_base.angular.z=angular_vel;
 	//publish
+	if (linear_vel!=linear_vel)
+	{	
+		 ROS_ERROR ("Send Velocity Base has linear NaN value!");
+		velocidad_base.linear.x=0.0;
+		velocidad_base.angular.z=0.0;
+		base_control_pub_.publish(velocidad_base);
+	}
+	else
+	{
+		if(angular_vel!=angular_vel)
+		{
+			ROS_ERROR("Send Velocity Base has angular NaN value!");
+			velocidad_base.linear.x=0.0;
+			velocidad_base.angular.z=0.0;
+			base_control_pub_.publish(velocidad_base);
+		}
+		else
+		{
+			ROS_INFO("Linear vel: %lg, Angular vel: %lg", linear_vel, angular_vel);
 
-	ROS_INFO("Linear vel: %lg, Angular vel: %lg", linear_vel, angular_vel);
-
-	base_control_pub_.publish(velocidad_base);
+			base_control_pub_.publish(velocidad_base);
+		}
+	}
 
 }
 
 float FaceFollower::controlPID(float x, float ix, float dx, float Kp, float Ki, float Kd)
 {
 	float result;
-	result=Kp*x+Ki*ix+Kd*dx;
-	return result*0.1;
+	try
+	{
+		result=Kp*x+Ki*ix+Kd*dx;
+		if (result!=result) ROS_ERROR ("PID CONTROLLER VALUE IS NaN");
+	}
+	catch(std::exception& e)
+	{
+		ROS_ERROR("PID controller returned a NaN value!");
+
+	}
+	return result;
 }
+
 
 /*
  * This function is executed when the node is killed
