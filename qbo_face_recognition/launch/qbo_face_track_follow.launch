@@ -31,5 +31,7 @@
    <param name="add_face_number" value="40"/>
     
   </node>
+	<!-- launch video streamer -->
+    <node pkg="qbo_face_tracking" name="image_publisher" type="streamer" />
 
 </launch>

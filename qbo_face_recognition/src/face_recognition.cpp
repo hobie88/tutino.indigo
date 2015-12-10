@@ -229,11 +229,21 @@ public:
       {
          cvShowImage("Input", img);
          cvWaitKey(1);
+	
       }
       cvReleaseImage( &greyImg );cvReleaseImage(&img);
       r.sleep(); 
       mutex_.unlock(); return;
     }
+/**** marco edit *********/
+    ROS_ERROR("******BEFORE IF STATEMENT*********");
+    if (show_screen_flag)
+    {
+	ROS_ERROR("+++++++WITHIN IF STATEMENT+++++++");
+	cvShowImage("Input", img);
+        cvWaitKey(1);
+    }
+/**************************/
     cvRectangle(img, cvPoint(faceRect.x, faceRect.y), cvPoint(faceRect.x + faceRect.width-1, faceRect.y + faceRect.height-1), CV_RGB(0,255,0), 1, 8, 0);
     faceImg = frl.cropImage(greyImg, faceRect);	// Get the detected face image.
     // Make sure the image is the same dimensions as the training images.

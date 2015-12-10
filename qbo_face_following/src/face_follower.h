@@ -33,6 +33,7 @@
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/SetCameraInfo.h>
+#include <std_msgs/Bool.h>
 #include <exception>
 
 #include <qbo_face_msgs/FacePosAndDist.h>
@@ -55,6 +56,7 @@ private:
 	 */
 	ros::Publisher base_control_pub_;
 	ros::Publisher joint_pub_;
+	ros::Publisher face_detected_pub_;
 
 	int image_width_;
 	int image_height_;
@@ -74,6 +76,10 @@ private:
 
 	double desired_distance_;
 	bool send_stop_;
+
+	int face_detected_count_;
+	ros::Time sent_;
+	ros::Duration time_limit_;
 
 	cv::Mat p_; //P matrix of the intrinsic parameters of the camera
 

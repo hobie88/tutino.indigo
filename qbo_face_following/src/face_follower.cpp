@@ -87,7 +87,8 @@ void FaceFollower::onInit()
 	 * Set node's publishers
 	 */
 	joint_pub_ = private_nh_.advertise<sensor_msgs::JointState>("/cmd_joints", 1); //To move the head
-	base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1); //to move robot's base
+	//base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1); //to move robot's base
+	face_detected_pub_=private_nh_.advertise<std_msgs::Bool>("/face_detected",1);
 
 	setROSParams();
 
@@ -97,6 +98,8 @@ void FaceFollower::onInit()
 	//TODO - Read from rosparam server this value
 	min_pitch_ = -0.5;
 
+	face_detected_count_=0;
+	time_limit_=ros::Duration(20);
 
 	//TODO - Should be ROS parameters
 	/*
@@ -176,7 +179,7 @@ void FaceFollower::jointStateCallback(const sensor_msgs::JointStateConstPtr& joi
 
 void FaceFollower::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 {
-
+//	ROS_ERROR("CAMERA_INFO_CALLBAK");
 	if(p_.data==NULL)
 	{
 		cv::Mat p=cv::Mat(3,4,CV_64F);
@@ -204,7 +207,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 {
 	image_width_ = head_pos_size->image_width;
 	image_height_ = head_pos_size->image_height;
-
+//	ROS_ERROR("FACE_POSITION_CALLBACK");
 	//Refresh status of move_base
 	private_nh_.getParam("/qbo_face_following/move_base", move_base_bool_);
 	private_nh_.getParam("/qbo_face_following/move_head", move_head_bool_);
@@ -216,7 +219,22 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		 */
 		float pan_vel;
 		float tilt_vel;
-
+		
+		face_detected_count_++;
+//		ROS_ERROR("***************** Counter: %d",face_detected_count_);
+		if(face_detected_count_ > 10)
+		{
+		    ros::Time now=ros::Time::now();
+		    if ((now-sent_)>time_limit_)
+		    {
+			    std_msgs::Bool msg;
+			    msg.data=true;
+			    face_detected_pub_.publish(msg);
+			    sent_=ros::Time::now();
+			    face_detected_count_=0;
+			    ros::Duration(1).sleep();
+		    }
+		}
 
 		/*
 		 * HEAD MOVEMENT
@@ -233,8 +251,11 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 
 		ROS_INFO("Moving head: pos(%lg, %lg) and vel(%lg, %lg)", v_act_,u_act_,tilt_vel,pan_vel);
 
-		if(move_head_bool_)	
+		if(move_head_bool_)
+		{	
 			setHeadPositionToFace(v_act_,u_act_,tilt_vel,pan_vel);
+			//ROS_ERROR("FOLLOWING HEAD");
+		}
 
 		if(!move_base_bool_)
 			return;
@@ -307,6 +328,10 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 	}
 	else //Qbo didn't detect any face and it's searching for one
 	{
+
+		//if(face_detected_count_ > 0) face_detected_count_--;
+		face_detected_count_=0;
+
 		srand(time(NULL));
 		float rand_tilt = search_min_tilt_+((search_max_tilt_-search_min_tilt_)/20.0) * double(rand()%20);
 		float rand_pan = search_min_pan_+((search_max_pan_-search_min_pan_)/20.0) * double(rand()%20);
@@ -452,25 +477,25 @@ void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 	//publish
 	if (linear_vel!=linear_vel)
 	{	
-		 ROS_ERROR ("Send Velocity Base has linear NaN value!");
+		 ROS_WARN("Send Velocity Base has linear NaN value!");
 		velocidad_base.linear.x=0.0;
 		velocidad_base.angular.z=0.0;
-		base_control_pub_.publish(velocidad_base);
+		//base_control_pub_.publish(velocidad_base);
 	}
 	else
 	{
 		if(angular_vel!=angular_vel)
 		{
-			ROS_ERROR("Send Velocity Base has angular NaN value!");
+			ROS_WARN("Send Velocity Base has angular NaN value!");
 			velocidad_base.linear.x=0.0;
 			velocidad_base.angular.z=0.0;
-			base_control_pub_.publish(velocidad_base);
+			//base_control_pub_.publish(velocidad_base);
 		}
 		else
 		{
 			ROS_INFO("Linear vel: %lg, Angular vel: %lg", linear_vel, angular_vel);
 
-			base_control_pub_.publish(velocidad_base);
+			//base_control_pub_.publish(velocidad_base);
 		}
 	}
 
@@ -482,7 +507,7 @@ float FaceFollower::controlPID(float x, float ix, float dx, float Kp, float Ki, 
 	try
 	{
 		result=Kp*x+Ki*ix+Kd*dx;
-		if (result!=result) ROS_ERROR ("PID CONTROLLER VALUE IS NaN");
+		if (result!=result) ROS_WARN ("PID CONTROLLER VALUE IS NaN");
 	}
 	catch(std::exception& e)
 	{
