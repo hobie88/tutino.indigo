@@ -37,7 +37,7 @@ class read_sensor:
     def leftSensorCallback(self, data):
         global left_distance
         left_distance = data.points[0].x
-        print 'LEFT SENSOR = ' + str(Decimal(data.points[0].x*100))
+        print 'LEFT SENSOR = ' + str(Decimal(data.points[0].x))
         
     def rightSensorCallback(self, data):
         global right_distance 

@@ -32,6 +32,6 @@
     
   </node>
 	<!-- launch video streamer -->
-    <node pkg="qbo_face_tracking" name="image_publisher" type="streamer" />
+	<include file="$(find usb_cam)/launch/usb_cam-test.launch" />
 
 </launch>

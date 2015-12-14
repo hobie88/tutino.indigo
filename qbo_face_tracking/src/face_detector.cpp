@@ -48,8 +48,8 @@ FaceDetector::~FaceDetector() {
 //    nose.color=0;
 
 
-    ros::Time time_saved;
-    time_saved = ros::Time::now();
+    ros::Time time_saved; // ??????????
+    time_saved = ros::Time::now(); // ???????????
 
     /*
      * Waiting for nose to turn off
@@ -83,6 +83,7 @@ void FaceDetector::setROSParams()
 	private_nh_.param<int>("check_Haar", check_Haar_, -1);
 
 
+
 	//Track object period for CAM Shift. When track object is true, the CAM shift algorithm will refresh the color skin
 	private_nh_.param<int>("/qbo_face_tracking/check_track_object", check_track_obj_, check_Haar_);
 
@@ -98,7 +99,7 @@ void FaceDetector::setROSParams()
 	private_nh_.param("/qbo_face_tracking/send_to_recognizer", send_to_face_recognizer_, false);
 	
 	//If true, this parameter will print the recognized person in the viewer. Note: only applicable when send_to_recognizer is set as true 
-	private_nh_.param("/qbo_face_tracking/print_recognized_face", print_recognized_face_, true);
+	private_nh_.param("/qbo_face_tracking/print_recognized_face", print_recognized_face_, false);
 
 }
 
@@ -152,14 +153,15 @@ void FaceDetector::onInit()
 	/*
 	 * Subscribers of the node
 	 */
-	info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/stereo/left/camera_info",10,&FaceDetector::infoCallback, this);
+	//info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/stereo/left/camera_info",10,&FaceDetector::infoCallback, this);
+	info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/usb_cam/camera_info",10,&FaceDetector::infoCallback, this);
 
 
 	/*
 	 * Publishers of the node
 	 */
 	//Publisher of the face tracking position and size
-	face_position_and_size_pub_=private_nh_.advertise<qbo_face_msgs::FacePosAndDist>("/qbo_face_tracking/face_pos_and_dist", 1);
+	face_position_and_size_pub_=private_nh_.advertise<qbo_face_msgs::FacePosAndDist>("/qbo_face_tracking/face_pos_and_dist", 10);
 	//Publisher of the face image
 	face_pub_ = private_nh_.advertise<sensor_msgs::Image>("/qbo_face_tracking/face_image", 1);
 	//Publisher of the viewer, using image transport for compression
@@ -238,7 +240,8 @@ void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 		 * Subscribing to image node
 		 */
 		//image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_rect_color",1,&FaceDetector::imageCallback, this);
-		image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_raw",1,&FaceDetector::imageCallback, this);
+		//image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/stereo/left/image_raw",1,&FaceDetector::imageCallback, this);
+		image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1,&FaceDetector::imageCallback, this);
 
 		//TODO - Unsubscribe to the camera info topic
 	}
@@ -397,12 +400,13 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 			head_distance=head_distances_[0];//100;
 		else
 		  head_distance = 5;
-
+		
 
 	}
 	else
 	{
 		head_distance=calcDistanceToHead(detected_face_, kalman_filter_);
+//		ROS_ERROR ("COMPUTED HEAD DISTANCE: %f",head_distance);
 	}
 	
     if(head_distances_.size()==0)
@@ -425,7 +429,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 
     head_distance=head_distance/head_distances_.size();
 
-
+//	ROS_ERROR ("HEAD DISTANCE AFTER MEAN COMPUTING: %f",head_distance);
 
     //Update undetected count
 	if(!face_detected_bool_)
@@ -450,8 +454,8 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 		message.face_detected = true;
 		message.u = kalman_filter_.statePost.at<float>(0,0) - cv_ptr->image.cols/2.;
 		message.v = kalman_filter_.statePost.at<float>(1,0) - cv_ptr->image.rows/2.;
-		message.distance_to_head = float(head_distance);
-
+//		message.distance_to_head = float(head_distance);
+		message.distance_to_head = head_distance;
 	}
 	else //If head has not been recently detected, face detection have failed
 	{
@@ -532,6 +536,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
     /*
      * Publish face position and size
      */
+	ROS_ERROR("Position: u= %f, v= %f, width= %d, height= %d", message.u, message.v, message.image_width,message.image_height);
     face_position_and_size_pub_.publish(message);
 
 
@@ -572,10 +577,10 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
     if(face_detected_bool_)
     {
     	if(dynamic_check_haar_)
-    		ROS_INFO("FACE DETECTED -> Head Pos :(%d, %d), Head Distance: %lg, Dynamic check Haar: %u, Det type: %s, Alt: %s",
+    		ROS_INFO("FACE DETECTED -> Head Pos :(%d, %d), Head Distance: %f, Dynamic check Haar: %u, Det type: %s, Alt: %s",
     				(int)message.u, (int)message.v, head_distance, check_Haar_, detection_type.c_str(), (exist_alternative_)?"true":"false");
     	else
-    		ROS_INFO("FACE DETECTED -> Head Pos :(%d, %d), Head Distance: %lg, Check Haar: %u, Detection type: %s, Alt: %s",
+    		ROS_INFO("FACE DETECTED -> Head Pos :(%d, %d), Head Distance: %f, Check Haar: %u, Detection type: %s, Alt: %s",
     				(int)message.u, (int)message.v, head_distance, check_Haar_, detection_type.c_str(), (exist_alternative_)?"true":"false");
     }
     else
@@ -871,13 +876,16 @@ float FaceDetector::calcDistanceToHead(cv::Mat& head, cv::KalmanFilter& kalman_f
 
 	cv::Mat cart_left=p_.inv()*uv_left;
 	cv::Mat cart_right=p_.inv()*uv_right;
-
+//	std::cout << "cart left: " << cart_left << std::endl;
 
 	cart_left=cart_left/sqrt(cart_left.dot(cart_left));
 	cart_right=cart_right/sqrt(cart_right.dot(cart_right));
-
+	
+//	std::cout << "cart left after: " << cart_left << std::endl;
+//	std::cout << "acos argument: " << cart_left.dot(cart_right) << std::endl;
 	float theta=acos(cart_left.dot(cart_right));
 	float l=(HEAD_SIZE/2)/tan(theta/2);
+	//ROS_ERROR("THETA= %f  --- DISTANCE TO HEAD= %f",theta,l);
 	return l;
 }
 

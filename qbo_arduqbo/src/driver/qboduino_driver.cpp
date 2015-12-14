@@ -20,8 +20,8 @@
  *
  * Authors: Miguel Angel Julian <miguel.a.j@openqbo.org>;
  * 
- */
-
+ */ 
+ 
 #include <driver/qboduino_driver.h>
 
 CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2) :
@@ -30,7 +30,7 @@ CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2
 //open serial ports
     firstDevice.open(port1.c_str(),baud1);
     secondDevice.open(port2.c_str(),baud2);
-
+    
     usleep(5500000);
 
 //test what board is on port1 and read version
@@ -81,7 +81,7 @@ CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2
         {
             boards_["head"]=&secondDevice;
             timeouts_["head"]=&timeout2_;
-            std::cout << "Head control board found in " << port2 << " and initialized at " << baud2 << " baudrate" << std::endl;;
+            std::cout << "Head control board found in " << port2 << " and initialized at " << baud2 << " baudrate" << std::endl;
         }
         else
         {
@@ -435,7 +435,14 @@ int CQboduinoDriver::getDistanceSensors(std::map<uint8_t,unsigned short>& sensor
     for (unsigned int i=0;i<data.size()/2;i++)
     {
       sensorsDistances[data[2*i].b]=data[2*i+1].h;
+    /*  if (i==0){
+        std::cout << "sensorDistances[data[0].b] = " << sensorsDistances[data[2*i].b] << std::endl;
+        std::cout << "data[1].h = " << data[2*i+1].h << std::endl;}
+      else{
+        std::cout << "sensorDistances[data[2].b] = " << sensorsDistances[data[2*i].b] << std::endl;
+        std::cout << "data[3].h = " << data[2*i+1].h << std::endl;}*/
     }
+//    std::cout << "getDistanceSensors CODE = " << (float) code << std::endl;
     return code;
 }
 
@@ -449,6 +456,7 @@ int CQboduinoDriver::getAdcReads(std::vector<uint8_t> addresses, std::vector<uns
     for(int i=0;i<addresses.size();i++)
     {
       d.b=addresses[i];
+     // std::cout << "addresses[i] = " << (float) addresses[i] << std::endl;
       sent.push_back(d);
     }
     
@@ -458,7 +466,9 @@ int CQboduinoDriver::getAdcReads(std::vector<uint8_t> addresses, std::vector<uns
     for (unsigned int i=0;i<received.size();i++)
     {
       readValues.push_back(received[i].h);
+    //  std::cout << "received[i].h = " << (float) received[i].h << std::endl;
     }
+//    std::cout << "getADCReads CODE = " << (float) code << std::endl;
     return code;
   
 }
@@ -529,6 +539,9 @@ uint8_t computeChecksum(uint8_t *key, uint8_t len)
   for (uint8_t i=0; i<len; i++)
   {
     hash = checksumdata[hash^key[i]];
+/*    std::cout << "key[i] = " << (float) key[i] << std::endl;
+    std::cout << "checksumdata[hash^key[i]] = " << (float) checksumdata[hash^key[i]] << std::endl;
+    std::cout << "key[i] = " << (float) key[i] << std::endl;*/
   }
   return (hash);
 }

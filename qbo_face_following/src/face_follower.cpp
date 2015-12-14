@@ -81,7 +81,8 @@ void FaceFollower::onInit()
 	/*
 	 * Set node's subscriptions
 	 */
-	camera_info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/stereo/left/camera_info",10,&FaceFollower::cameraInfoCallback, this);
+	//camera_info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/stereo/left/camera_info",10,&FaceFollower::cameraInfoCallback, this);
+	camera_info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/usb_cam/camera_info",10,&FaceFollower::cameraInfoCallback, this);
 
 	/*
 	 * Set node's publishers
@@ -109,17 +110,19 @@ void FaceFollower::onInit()
 	u_act_=0;
 	u_prev_=0;
 	diff_u_=0;
-	kp_u_=0.0040; //0.0066
+	kp_u_=0.0020; //0.0066
 	ki_u_=0;
 	kd_u_=0.001;
+	
 
 	//For head's tilt movement
 	v_act_=0;
 	v_prev_=0;
 	diff_v_=0;
-	kp_v_=0.0040;
+	kp_v_=0.0020;
 	ki_v_=0;
 	kd_v_=0.001;
+	
 
 	//For base's linear movement
 	//ros::Time delta;
@@ -229,10 +232,11 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		    {
 			    std_msgs::Bool msg;
 			    msg.data=true;
+			    ros::Duration(1).sleep();
 			    face_detected_pub_.publish(msg);
 			    sent_=ros::Time::now();
 			    face_detected_count_=0;
-			    ros::Duration(1).sleep();
+			    ros::Duration(3).sleep();
 		    }
 		}
 
@@ -338,10 +342,12 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 
 
 		ROS_INFO("Randomly moving head: pos(%lg, %lg) and vel(%lg, %lg)", rand_tilt, rand_pan, search_tilt_vel_, search_pan_vel_);
-		
-		if(move_head_bool_)
-			setHeadPositionGlobal(rand_tilt, rand_pan, 0.3, 0.3);
 
+		if(move_head_bool_)
+		{
+		//	ROS_ERROR("move_head_bool_ is true");
+			setHeadPositionGlobal(rand_tilt, rand_pan, 0.3, 0.3);
+		}
 		//TODO - Analyse this
 		if(move_base_bool_ && send_stop_)
 			sendVelocityBase(0,0);
@@ -466,6 +472,10 @@ void FaceFollower::setHeadPositionGlobal(float pos_updown, float pos_leftright, 
  */
 void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 {
+	if (linear_vel > 0.2) linear_vel = 0.2;
+	if (linear_vel < -0.2) linear_vel = -0.2;
+	if (angular_vel > 0.5) angular_vel = 0.5;
+	if (angular_vel < -0.5) angular_vel = -0.5;
 	geometry_msgs::Twist velocidad_base;
 	velocidad_base.linear.x=linear_vel;
 	velocidad_base.linear.y=0;
@@ -475,11 +485,13 @@ void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 	velocidad_base.angular.y=0;
 	velocidad_base.angular.z=angular_vel;
 	//publish
+//	base_control_pub_.publish(velocidad_base);
+/*
 	if (linear_vel!=linear_vel)
 	{	
 		 ROS_WARN("Send Velocity Base has linear NaN value!");
 		velocidad_base.linear.x=0.0;
-		velocidad_base.angular.z=0.0;
+		velocidad_base.angular.z=0.0
 		//base_control_pub_.publish(velocidad_base);
 	}
 	else
@@ -497,7 +509,7 @@ void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 
 			//base_control_pub_.publish(velocidad_base);
 		}
-	}
+	} */
 
 }
 

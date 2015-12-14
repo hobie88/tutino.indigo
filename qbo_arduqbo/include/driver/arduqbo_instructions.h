@@ -103,7 +103,7 @@ class ComandosSet
 			mouth(0x44,3,0), 
 			nose(0x45,1,0),
             		setServo(0x53,3,0,"bhh"), 
-			getServo(0x5d,1,1,"b","h"), 
+			getServo(0x5d,1,1,"b","h"),
 			getHeadServos(0x5c,0,2,"b","h"), 
 			getEyeServos(0x5f,0,2,"b","h"),
             		setMic(0x4a,1,0), 

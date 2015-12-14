@@ -3,6 +3,17 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sstream>
+#include <sensor_msgs/image_encodings.h>
+
+/******* CALLBACK TO TEST VIDEO STREAMING *************
+void viewer_callback(const sensor_msgs::Image::ConstPtr& image_ptr)
+{
+	cv::namedWindow("Image viewer", cv::WINDOW_AUTOSIZE);
+	cv_bridge::CvImagePtr cv_ptr;
+	cv_ptr = cv_bridge::toCvCopy(image_ptr, sensor_msgs::image_encodings::RGB8);
+	imshow("Image viewer",cv_ptr->image);
+}
+*******************************************/
 
 int main(int argc, char** argv)
 {
@@ -13,6 +24,8 @@ int main(int argc, char** argv)
   image_transport::ImageTransport it(nh);
   image_transport::Publisher pub = it.advertise("/stereo/left/image_raw", 1);
   ros::Publisher infoPub = nh.advertise<sensor_msgs::CameraInfo>("/stereo/left/camera_info",1);
+//  ros::Subscriber subImage = nh.subscribe("/stereo/left/image_raw",1,viewer_callback); // test video stream
+
 
 //  std::istringstream video_sourceCmd(argv[1]);
 //  int video_source;
@@ -46,4 +59,5 @@ int main(int argc, char** argv)
     loop_rate.sleep();
   }
 }
+
 
