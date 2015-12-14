@@ -4,6 +4,8 @@
 
 	<!-- Face Tracking node to detect faces -->
 	<node name="qbo_face_tracking" pkg="qbo_face_tracking" type="qbo_face_tracking" >
+	</node>
+	<node name="face_image_viewer" pkg="qbo_face_tracking" type="face_image_viewer">
 	</node> 
 	 
 	<!-- Face Following node to move head and base (Pan = L/R ; Tilt = U/D) -->

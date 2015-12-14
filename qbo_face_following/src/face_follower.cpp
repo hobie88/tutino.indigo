@@ -83,6 +83,9 @@ void FaceFollower::onInit()
 	 */
 	//camera_info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/stereo/left/camera_info",10,&FaceFollower::cameraInfoCallback, this);
 	camera_info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/usb_cam/camera_info",10,&FaceFollower::cameraInfoCallback, this);
+    
+    
+
 
 	/*
 	 * Set node's publishers
@@ -180,6 +183,7 @@ void FaceFollower::jointStateCallback(const sensor_msgs::JointStateConstPtr& joi
     }
 }
 
+
 void FaceFollower::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 {
 //	ROS_ERROR("CAMERA_INFO_CALLBAK");
@@ -208,6 +212,7 @@ void FaceFollower::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& i
  */
 void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConstPtr& head_pos_size)
 {
+    ROS_ERROR("facepositionCallback called");
 	image_width_ = head_pos_size->image_width;
 	image_height_ = head_pos_size->image_height;
 //	ROS_ERROR("FACE_POSITION_CALLBACK");
@@ -222,7 +227,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		 */
 		float pan_vel;
 		float tilt_vel;
-		
+		ROS_ERROR("face detected!!!!");
 		face_detected_count_++;
 //		ROS_ERROR("***************** Counter: %d",face_detected_count_);
 		if(face_detected_count_ > 10)
@@ -232,11 +237,10 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		    {
 			    std_msgs::Bool msg;
 			    msg.data=true;
-			    ros::Duration(1).sleep();
+			    
 			    face_detected_pub_.publish(msg);
 			    sent_=ros::Time::now();
 			    face_detected_count_=0;
-			    ros::Duration(3).sleep();
 		    }
 		}
 
@@ -253,7 +257,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		tilt_vel=controlPID(v_act_,0,diff_v_,kp_v_,ki_v_,kd_v_);
 		v_prev_=v_act_;
 
-		ROS_INFO("Moving head: pos(%lg, %lg) and vel(%lg, %lg)", v_act_,u_act_,tilt_vel,pan_vel);
+		ROS_ERROR("Moving head: pos(%lg, %lg) and vel(%lg, %lg)", v_act_,u_act_,tilt_vel,pan_vel);
 
 		if(move_head_bool_)
 		{	
@@ -271,6 +275,8 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		/*
 		 * Velocities for base movement
 		 */
+		 
+
 		float linear_vel = 0;
 		float angular_vel = 0;
 
@@ -324,9 +330,9 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		{
 			ROS_INFO("--------- Linear_vel is not a Nan");
 		}
-*****************************/
+/*****************************/
 		ROS_INFO("++++++++Moving base: linear velocity: %lg, angular vel: %lg",linear_vel,angular_vel);
-		sendVelocityBase(linear_vel,angular_vel);
+//		sendVelocityBase(linear_vel,angular_vel);
 
 
 	}
@@ -349,8 +355,8 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 			setHeadPositionGlobal(rand_tilt, rand_pan, 0.3, 0.3);
 		}
 		//TODO - Analyse this
-		if(move_base_bool_ && send_stop_)
-			sendVelocityBase(0,0);
+	//	if(move_base_bool_ && send_stop_)
+	//		sendVelocityBase(0,0);
 	}
 
 }
@@ -362,7 +368,7 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 {
 	if(p_.data == NULL)
 		return;
-
+    ROS_ERROR("SETHEADPOSITIONTOFACE CALLED");
 //	printf("Pos_left_right: %lg\n",pos_leftright);
 	
 	float pan_pos,tilt_pos;
@@ -372,7 +378,7 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 
 	pan_pos = atan2((pan_pos - p_.at<float>(0,2)),p_.at<float>(0,0));
 	tilt_pos = atan2((tilt_pos - p_.at<float>(1,2)),p_.at<float>(1,1));
-	
+	ROS_ERROR ("PAN_POS: %lg **** TILT_POS: %lg",pan_pos,tilt_pos);
 //	printf("Angle pos: %lg. Yaw from joint: %lg \n", pan_pos, yaw_from_joint_);
 
 
@@ -506,7 +512,6 @@ void FaceFollower::sendVelocityBase(float linear_vel, float angular_vel)
 		else
 		{
 			ROS_INFO("Linear vel: %lg, Angular vel: %lg", linear_vel, angular_vel);
-
 			//base_control_pub_.publish(velocidad_base);
 		}
 	} */

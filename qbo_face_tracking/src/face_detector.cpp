@@ -471,6 +471,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
     	//Publish head to topic
     	cv_ptr->image = detected_face_;
 		face_pub_.publish(cv_ptr->toImageMsg());
+	
 
 
 		if(send_to_face_recognizer_)

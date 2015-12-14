@@ -22,16 +22,10 @@ class read_sensor:
         pub = rospy.Publisher('wall_distance', Point32, queue_size=10)
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
-            #out_file = open ("left_sensor.txt","a")
-#            wall_distance = min(left_distance, right_distance)
             wall_distance.x = right_distance
             wall_distance.y = left_distance
-            #out_file.write(str(left_distance))
-            rospy.logerr("LEFT DISTANCE: " + str(left_distance))
-            #out_file.write("\n")
             wall_distance.z = floor_distance
             pub.publish(wall_distance)
-            #out_file.close()
             rate.sleep()          
 
     def floorSensorCallback(self, data):
@@ -50,14 +44,11 @@ class read_sensor:
         print 'RIGHT SENSOR = ' + str(data.points[0].x)
         global count
         count = count +1
-        print 'COUNT = ' + str(count)
-        
+        print 'COUNT = ' + str(count)   
         
 if __name__ == '__main__':
     try:
         rospy.init_node('read_sensor')
-        
-     #   cmd_vel = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         nodo = read_sensor()
         rospy.spin()
     except rospy.ROSInterruptException: 
