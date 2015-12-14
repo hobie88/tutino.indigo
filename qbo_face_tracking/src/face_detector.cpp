@@ -536,7 +536,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
     /*
      * Publish face position and size
      */
-	ROS_ERROR("Position: u= %f, v= %f, width= %d, height= %d", message.u, message.v, message.image_width,message.image_height);
+	ROS_INFO("Position: u= %f, v= %f, width= %d, height= %d", message.u, message.v, message.image_width,message.image_height);
     face_position_and_size_pub_.publish(message);
 
 

@@ -74,7 +74,8 @@ public:
        ROS_WARN("Alert: Database is not updated. Please delete \"facedata.xml\" and re-run!"); //AFTER
     }
     //subscribe to video stream through image transport class
-    image_sub_ = it_.subscribe("/stereo/left/image_raw", 1, &FaceRecognition::imageCB, this);
+    //image_sub_ = it_.subscribe("/stereo/left/image_raw", 1, &FaceRecognition::imageCB, this);
+    image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, &FaceRecognition::imageCB, this);
   }
 
   ~FaceRecognition(void)
@@ -182,6 +183,7 @@ public:
   }
   void imageCB(const sensor_msgs::ImageConstPtr& msg)
   {
+    //ROS_ERROR("CALBBACK CALLED");
     //to synchronize with executeCB function.
     //as far as the goal id is 0, 1 or 2, it's active and there is no preempting request, imageCB function is proceed.
     if (!as_.isActive() || goal_id_ > 2)      return;
