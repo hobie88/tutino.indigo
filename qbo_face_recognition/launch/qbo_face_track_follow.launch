@@ -5,8 +5,8 @@
 	<!-- Face Tracking node to detect faces -->
 	<node name="qbo_face_tracking" pkg="qbo_face_tracking" type="qbo_face_tracking" >
 	</node>
-	<node name="face_image_viewer" pkg="qbo_face_tracking" type="face_image_viewer">
-	</node> 
+<!--	<node name="face_image_viewer" pkg="qbo_face_tracking" type="face_image_viewer">
+	</node> --> 
 	 
 	<!-- Face Following node to move head and base (Pan = L/R ; Tilt = U/D) -->
 	<node name="qbo_face_following" pkg="qbo_face_following" type="qbo_face_following">
@@ -28,9 +28,10 @@
   <node pkg="qbo_face_recognition"  name="qbo_face_recognition" type="Fserver" output="screen" >
    
    
-   <param name="confidence_value" value="0.90"/>
+   <param name="confidence_value" value="0.73"/>
    <param name="show_screen_flag" value="true"/>
    <param name="add_face_number" value="40"/>
+   <param name="/recognize" value="true" /> 
     
   </node>
 	<!-- launch video streamer -->

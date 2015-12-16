@@ -30,6 +30,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+#include <std_msgs/String.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
@@ -57,15 +58,17 @@ public:
     textColor = CV_RGB(0,255,255);	// light blue text
     goal_id_ = -99; 
     //a face recognized with confidence value higher than the confidence_value threshold is accepted as valid.
-    confidence_value = 0.88;
+    confidence_value = 0.75;
     //if output screen is shown
     show_screen_flag = true;
     //a parameter for the "add_face_images" goal which determines the number of training images for a new face (person) to be acquired from the video stream 
-    add_face_number = 25;
+    add_face_number = 30;
     //the number of persons in the training file (train.txt)
     person_number=0;
     //starting the actionlib server
-    as_.start();
+   // while(!as_.isActive())
+         as_.start();
+    //ROS_ERROR("SERVER IS ACTIVE");
     //if the number of persons in the training file is not equal with the number of persons in the trained database, the database is not updated and user should be notified to retrain the database if new tarining images are to be considered.
     if(calcNumTrainingPerson("train.txt")!=frl.nPersons)
     {
@@ -75,7 +78,11 @@ public:
     }
     //subscribe to video stream through image transport class
     //image_sub_ = it_.subscribe("/stereo/left/image_raw", 1, &FaceRecognition::imageCB, this);
+    
     image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, &FaceRecognition::imageCB, this);
+    name_pub = nh_.advertise<std_msgs::String>("/name_detected", 5);
+    nh_.param<bool>("/qbo_face_recognition/recognize",recognize,true);
+
   }
 
   ~FaceRecognition(void)
@@ -86,6 +93,7 @@ public:
 
   void executeCB(const qbo_face_recognition::FaceRecognitionGoalConstPtr &goal)
   {
+    ROS_ERROR("ExecuteCB called!!!!!");
     //check to be sure if the goal should be still persuaded
     if( as_.isPreemptRequested() || ros::isShuttingDown() )
     {
@@ -134,10 +142,15 @@ public:
 	 {
 	  if(goal_id_ == 2)
             add_face_count=0;
+        ROS_ERROR("Action Server called: goal id 2");
           //to synchronize with processes performed in the subscribed function to the video stream (imageCB)
           //as far as the goal id is 0, 1 or 2, it's active and there is no preempting request, imageCB function can be called.
+          face_detect_sub_ = it_.subscribe("/qbo_face_tracking/face_pos_and_dist",5, &FaceRecognition::imageCB, this);
+          
+          
           while( as_.isActive() && !as_.isPreemptRequested() && !ros::isShuttingDown() )
             r.sleep();
+      ROS_ERROR("EXECUTE_CB, case 2 (add face) locking mutex");
 	  mutex_.lock();
 	  if(as_.isActive())	
           { 
@@ -183,10 +196,16 @@ public:
   }
   void imageCB(const sensor_msgs::ImageConstPtr& msg)
   {
-    //ROS_ERROR("CALBBACK CALLED");
+    
     //to synchronize with executeCB function.
     //as far as the goal id is 0, 1 or 2, it's active and there is no preempting request, imageCB function is proceed.
-    if (!as_.isActive() || goal_id_ > 2)      return;
+  // if (!as_.isActive() || goal_id_ > 2)   // marco edit
+  // if (!as_.isActive())
+  //      {
+  //          ROS_ERROR("PRIMO IF CONDITION--as is not active");
+  //         return;
+  //      }
+        
     if(!mutex_.try_lock()) return;    
     if(as_.isPreemptRequested())    
     {
@@ -223,7 +242,7 @@ public:
     // Make sure a valid face was detected.
     if (faceRect.width < 1) 
     {
-      ROS_INFO("No face was detected in the last frame"); 
+      ROS_ERROR("No face was detected in the last frame"); 
       text_image.str(""); 
       text_image <<"No face was detected. ";
       cvPutText(img, text_image.str().c_str(), cvPoint(10, faceRect.y + 50), &font, textColor);
@@ -237,15 +256,13 @@ public:
       r.sleep(); 
       mutex_.unlock(); return;
     }
-/**** marco edit *********/
-    ROS_ERROR("******BEFORE IF STATEMENT*********");
+
     if (show_screen_flag)
     {
-	ROS_ERROR("+++++++WITHIN IF STATEMENT+++++++");
 	cvShowImage("Input", img);
         cvWaitKey(1);
     }
-/**************************/
+
     cvRectangle(img, cvPoint(faceRect.x, faceRect.y), cvPoint(faceRect.x + faceRect.width-1, faceRect.y + faceRect.height-1), CV_RGB(0,255,0), 1, 8, 0);
     faceImg = frl.cropImage(greyImg, faceRect);	// Get the detected face image.
     // Make sure the image is the same dimensions as the training images.
@@ -268,6 +285,7 @@ public:
      //goal is add_face_images
      if( goal_id_==2  )      
      {
+        ROS_ERROR("goal_id is 2");
         if(add_face_count==0)  
         {
            //assign the correct number for the new person
@@ -317,8 +335,10 @@ public:
         as_.publishFeedback(feedback_);     
      }
      //goal is to recognize person in the video stream
-     if( goal_id_<2 )      
+     // if( goal_id_<2 )      // marco edit
+     if (recognize)
     {
+       ROS_ERROR("WITHIN RECOGNIZE");
        int iNearest, nearest;
        float confidence;
        float * projectedTestFace=0;
@@ -352,6 +372,9 @@ public:
        }
        else
        {
+          ROS_ERROR("CONFIDENCE OK!!!!!!!!!!!!!!");
+          std_msgs::String msg;
+          msg.data=frl.personNames[nearest-1].c_str(); //marco edit
           text_image <<  frl.personNames[nearest-1].c_str()<<" is recognized";
           cvPutText(img, text_image.str().c_str(), cvPoint(faceRect.x, faceRect.y + faceRect.height + 25), &font, textColor);
 	  //goal is to recognize_once, therefore set as succeeded.
@@ -360,6 +383,7 @@ public:
              result_.names.push_back(frl.personNames[nearest-1].c_str());
              result_.confidence.push_back(confidence);
              as_.setSucceeded(result_);
+             name_pub.publish(msg);
           }
           //goal is recognize continuous, provide feedback and continue.
           else
@@ -369,7 +393,8 @@ public:
              feedback_.confidence.clear();
              feedback_.names.push_back(frl.personNames[nearest-1].c_str());
              feedback_.confidence.push_back(confidence);
-             as_.publishFeedback(feedback_);                
+             as_.publishFeedback(feedback_);  
+             name_pub.publish(msg);              
           }
                              
        }
@@ -398,6 +423,7 @@ protected:
   FILE *trainFile; 
   double confidence_value;//a face recognized with confidence value higher than confidence_value threshold is accepted as valid.
   bool   show_screen_flag;//if output window is shown
+  bool recognize;
   int    add_face_number; //the number of training images to be taken in add_face_images goal
   CvFont font;
   CvScalar textColor;
@@ -406,6 +432,8 @@ protected:
   FaceRecognitionLib frl; 
   image_transport::ImageTransport it_;
   image_transport::Subscriber image_sub_;
+  image_transport::Subscriber face_detect_sub_;
+  ros::Publisher name_pub;
   actionlib::SimpleActionServer<qbo_face_recognition::FaceRecognitionAction> as_;
   int person_number;     //the number of persons in the train file (train.txt)
 };

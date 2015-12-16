@@ -92,7 +92,7 @@ void FaceFollower::onInit()
 	 */
 	joint_pub_ = private_nh_.advertise<sensor_msgs::JointState>("/cmd_joints", 1); //To move the head
 	//base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1); //to move robot's base
-	face_detected_pub_=private_nh_.advertise<std_msgs::Bool>("/face_detected",1);
+	//face_detected_pub_=private_nh_.advertise<std_msgs::Bool>("/face_detected",1);
 
 	setROSParams();
 
@@ -115,7 +115,7 @@ void FaceFollower::onInit()
 	diff_u_=0;
 	kp_u_=0.0020; //0.0066
 	ki_u_=0;
-	kd_u_=0.001;
+	kd_u_=0.0001;
 	
 
 	//For head's tilt movement
@@ -124,7 +124,7 @@ void FaceFollower::onInit()
 	diff_v_=0;
 	kp_v_=0.0020;
 	ki_v_=0;
-	kd_v_=0.001;
+	kd_v_=0.0001;
 	
 
 	//For base's linear movement
@@ -212,7 +212,7 @@ void FaceFollower::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& i
  */
 void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConstPtr& head_pos_size)
 {
-    ROS_ERROR("facepositionCallback called");
+//    ROS_ERROR("facepositionCallback called");
 	image_width_ = head_pos_size->image_width;
 	image_height_ = head_pos_size->image_height;
 //	ROS_ERROR("FACE_POSITION_CALLBACK");
@@ -227,7 +227,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		 */
 		float pan_vel;
 		float tilt_vel;
-		ROS_ERROR("face detected!!!!");
+//		ROS_ERROR("face detected!!!!");
 		face_detected_count_++;
 //		ROS_ERROR("***************** Counter: %d",face_detected_count_);
 		if(face_detected_count_ > 10)
@@ -238,7 +238,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 			    std_msgs::Bool msg;
 			    msg.data=true;
 			    
-			    face_detected_pub_.publish(msg);
+			   // face_detected_pub_.publish(msg);
 			    sent_=ros::Time::now();
 			    face_detected_count_=0;
 		    }
@@ -257,7 +257,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		tilt_vel=controlPID(v_act_,0,diff_v_,kp_v_,ki_v_,kd_v_);
 		v_prev_=v_act_;
 
-		ROS_ERROR("Moving head: pos(%lg, %lg) and vel(%lg, %lg)", v_act_,u_act_,tilt_vel,pan_vel);
+//		ROS_ERROR("Moving head: pos(%lg, %lg) and vel(%lg, %lg)", v_act_,u_act_,tilt_vel,pan_vel);
 
 		if(move_head_bool_)
 		{	
@@ -368,7 +368,7 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 {
 	if(p_.data == NULL)
 		return;
-    ROS_ERROR("SETHEADPOSITIONTOFACE CALLED");
+//    ROS_ERROR("SETHEADPOSITIONTOFACE CALLED");
 //	printf("Pos_left_right: %lg\n",pos_leftright);
 	
 	float pan_pos,tilt_pos;
@@ -378,7 +378,7 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 
 	pan_pos = atan2((pan_pos - p_.at<float>(0,2)),p_.at<float>(0,0));
 	tilt_pos = atan2((tilt_pos - p_.at<float>(1,2)),p_.at<float>(1,1));
-	ROS_ERROR ("PAN_POS: %lg **** TILT_POS: %lg",pan_pos,tilt_pos);
+//	ROS_ERROR ("PAN_POS: %lg **** TILT_POS: %lg",pan_pos,tilt_pos);
 //	printf("Angle pos: %lg. Yaw from joint: %lg \n", pan_pos, yaw_from_joint_);
 
 

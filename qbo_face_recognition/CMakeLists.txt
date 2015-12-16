@@ -121,7 +121,7 @@ add_executable(Fclient src/face_rec_client.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 
-#add_dependencies(Fclient qbo_face_recognition_generate_messages_cpp)
+add_dependencies(Fclient qbo_face_recognition_generate_messages_cpp)
 
 add_dependencies(Fserver ${catkin_EXPORTED_TARGETS})
 add_dependencies(Fclient ${catkin_EXPORTED_TARGETS})

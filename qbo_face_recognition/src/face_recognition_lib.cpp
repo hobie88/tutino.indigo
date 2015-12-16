@@ -72,6 +72,7 @@ public:
   bool retrainOnline(void);
   FaceRecognitionLib()
   {
+//     ROS_ERROR("FACE_RECOGNITION_LIB constructor called"); // marco edit
      SAVE_EIGENFACE_IMAGES = 1;		
      faceImgArr= 0; 
      faceWidth = 120;
@@ -95,6 +96,7 @@ public:
        ROS_INFO("Could not load Haar cascade Face detection classifier in '%s'.", faceCascadeFilename);
        exit(1);
      }   
+//     ROS_ERROR("FACE_RECOGNITION_LIB Haar cascade loaded");
      // Make sure there is a "data" folder, for storing the new person.
      mkdir("data",S_IRWXU | S_IRWXG | S_IRWXO); 
      // Load the previously saved training data

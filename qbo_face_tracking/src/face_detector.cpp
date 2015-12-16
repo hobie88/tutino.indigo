@@ -225,7 +225,7 @@ void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 {
 	if(p_.data==NULL)
 	{
-	    ROS_INFO("CameraInfo callback");
+//	    ROS_ERROR("CameraInfo callback");
 		cv::Mat p=cv::Mat(3,4,CV_64F);
 		for (int i=0;i<3;i++)
 		{
@@ -251,7 +251,7 @@ void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
 
 void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 {
-
+//    ROS_ERROR("Image callback");
 	/*
 	 * Cretate a CvImage pointer to get cv::Mat representation of image
 	 */

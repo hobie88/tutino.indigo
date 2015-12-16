@@ -9,17 +9,17 @@
 
 #include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
-#include <face_recognition/FRClientGoal.h>
-#include <face_recognition/FaceRecognitionAction.h>
+#include <qbo_face_recognition/FRClientGoal.h>
+#include <qbo_face_recognition/FaceRecognitionAction.h>
 #include <signal.h>
 
-face_recognition::FaceRecognitionGoal goal; //Goal message
-actionlib::SimpleActionClient<face_recognition::FaceRecognitionAction> * ac; //action lib client
+qbo_face_recognition::FaceRecognitionGoal goal; //Goal message
+actionlib::SimpleActionClient<qbo_face_recognition::FaceRecognitionAction> * ac; //action lib client
 
 
 // Called once when the goal completes
 void doneCb(const actionlib::SimpleClientGoalState& state,
-            const face_recognition::FaceRecognitionResultConstPtr& result)
+            const qbo_face_recognition::FaceRecognitionResultConstPtr& result)
 {
   ROS_INFO("Goal [%i] Finished in state [%s]", result->order_id,state.toString().c_str());
   if(state.toString() != "SUCCEEDED") return;
@@ -36,7 +36,7 @@ void activeCb()
 }
 
 // Called every time feedback is received for the goal
-void feedbackCb(const face_recognition::FaceRecognitionFeedbackConstPtr& feedback)
+void feedbackCb(const qbo_face_recognition::FaceRecognitionFeedbackConstPtr& feedback)
 {
   ROS_INFO("Received feedback from Goal [%d] ", feedback->order_id);
   if(feedback->order_id==1 )
@@ -46,7 +46,7 @@ void feedbackCb(const face_recognition::FaceRecognitionFeedbackConstPtr& feedbac
 }
 
 //called for every FRClientGoal message received by the client. Client processes each message and sends the corresponding goal to the server and registers feedback and result and status call back functions.
-void frclientCallback(const face_recognition::FRClientGoalConstPtr& msg)
+void frclientCallback(const qbo_face_recognition::FRClientGoalConstPtr& msg)
   {
      
      ROS_INFO("request for sending goal [%i] is received", msg->order_id);
@@ -66,7 +66,7 @@ int main (int argc, char **argv)
 {
   ros::init(argc, argv, "face_recognition_client");
   ros::NodeHandle n;
-  ac = new actionlib::SimpleActionClient<face_recognition::FaceRecognitionAction>("face_recognition", true);
+  ac = new actionlib::SimpleActionClient<qbo_face_recognition::FaceRecognitionAction>("qbo_face_recognition", true);
   //for proper shutdown exit_handler is used
   struct sigaction sigIntHandler;
   sigIntHandler.sa_handler = exit_handler;

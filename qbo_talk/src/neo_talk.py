@@ -10,7 +10,7 @@ import roslib
 from qbo_talk.srv import Text2Speach # read service content (words we want to be spoken)
 import os
 import subprocess
-from std_msgs.msg import Bool
+from std_msgs.msg import String
 from random import choice
 
 # Some possibilities of different languages
@@ -20,7 +20,7 @@ from random import choice
 fr1_speak = "pico2wave -l fr-FR -w test.wav \"%s\" && play test.wav"
 en1_speak = "pico2wave -l en-GB -w test.wav \"%s\" && play test.wav"
 it1_speak = "pico2wave -l it-IT -w test.wav \"%s\" && play test.wav"
-
+name = "ciao"
 
 def run_process(command = ""):
     if command != "":
@@ -37,16 +37,22 @@ class talk():
         fr1 = rospy.Service('say_fr1', Text2Speach, self.fr1_talk)
         en1 = rospy.Service('say_en1', Text2Speach, self.en1_talk)
     	it1 = rospy.Service('say_it1', Text2Speach, self.it1_talk)
-	rospy.Subscriber('/face_detected',Bool,self.callback)
+	rospy.Subscriber('/name_detected',String,self.callback)
+	    
         
 
     #TODO  Dic. words fo gain better words sounds ! 
 
     def callback(self, msg):
-	sentence=choice(["Tanti auguri di buon natale","ciao, come va?","heilà, come stai?","ciao umano, come va?","salve, come sta?","ciao io sono tutìno ", "ciao collega!"])
-	run_process("amixer -c 1 sset Mic,1 0%")
-	os.system(it1_speak % sentence)
-	run_process("amixer -c 1 sset Mic,1 75%")
+ #       global name; 
+	#sentence=choice(["Tanti auguri di buon natale","ciao, come va?","heilà, come stai?","ciao umano, come va?","salve, come sta?","ciao io sono tutìno ", "ciao collega!"])
+	    global name
+	    if name != msg.data:
+	        sentence = "ciao" + msg.data;
+	        run_process("amixer -c 1 sset Mic,1 0%")
+	        os.system(it1_speak % sentence)
+	        run_process("amixer -c 1 sset Mic,1 75%")
+	        name = msg.data
 
     def it1_talk(self, speak):
         run_process("amixer -c 1 sset Mic,1 0%")
