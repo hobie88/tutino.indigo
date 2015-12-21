@@ -352,7 +352,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		if(move_head_bool_)
 		{
 		//	ROS_ERROR("move_head_bool_ is true");
-			setHeadPositionGlobal(rand_tilt, rand_pan, 0.3, 0.3);
+			setHeadPositionGlobal(rand_tilt, rand_pan, 0.2, 0.2);
 		}
 		//TODO - Analyse this
 	//	if(move_base_bool_ && send_stop_)
