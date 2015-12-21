@@ -14,6 +14,7 @@ bfs::path input_dir("/opt/ros/indigo/catkin_ws/src/video_capture/src/data2/");
 
 CvRect detectFaceInImage(IplImage*,CvHaarClassifierCascade*);
 IplImage* crop( IplImage*,  CvRect);
+IplImage* resizeImage(const IplImage* ,int, int);
 
 
 int main(int argc, char** argv)
@@ -143,20 +144,62 @@ CvRect detectFaceInImage(IplImage *inputImg, CvHaarClassifierCascade* cascade)
 
 IplImage* crop( IplImage* src,  CvRect roi)
 {
-
+    IplImage *imageTmp;
+    IplImage * cropped;
+    CvSize size;
+	size.height = src->height;
+	size.width = src->width;
   // Must have dimensions of output image
-  IplImage* cropped = cvCreateImage( cvSize(roi.width,roi.height), src->depth, src->nChannels );
-
+    imageTmp = cvCreateImage( size, IPL_DEPTH_8U, src->nChannels );
+    cvCopy(src, imageTmp, NULL);
   // Say what the source region is
-  cvSetImageROI( src, roi );
+    cvSetImageROI( imageTmp, roi );
 
-  // Do the copy
-  cvCopy( src, cropped );
-  cvResetImageROI( src );
+    size.width = roi.width;
+	size.height = roi.height;
+	cropped = cvCreateImage(size, IPL_DEPTH_8U, src->nChannels);
+	cvCopy(imageTmp, cropped, NULL);	// Copy just the region.
+    cropped = resizeImage(cropped,120,90);
+    cvReleaseImage( &imageTmp );
+	return cropped;
+}
 
-  //cvNamedWindow( "check", 1 );
-  //cvShowImage( "check", cropped );
-  //cvSaveImage ("style.jpg" , cropped);
 
-  return cropped;
+IplImage* resizeImage(const IplImage *origImg, int newWidth, int newHeight)
+{
+	IplImage *outImg = 0;
+	int origWidth;
+	int origHeight;
+	if (origImg) {
+		origWidth = origImg->width;
+		origHeight = origImg->height;
+	}
+	if (newWidth <= 0 || newHeight <= 0 || origImg == 0 || origWidth <= 0 || origHeight <= 0) {
+	    // marco edit ***********************************
+	    std::cout << "foto: " << origImg->ID << std::endl;
+	   //cvNamedWindow( "check2", 1 );
+       //cvShowImage( "check2", origImg );
+       //cv::waitKey(30);
+       //std::string tmp;
+       // std::cin>>tmp;
+
+	    /**************************************************************************/
+		printf("ERROR in resizeImage: Bad desired image size of %dx%d.", newWidth, newHeight);
+		exit(1);
+	}
+
+	// Scale the image to the new dimensions, even if the aspect ratio will be changed.
+	outImg = cvCreateImage(cvSize(newWidth, newHeight), origImg->depth, origImg->nChannels);
+	if (newWidth > origImg->width && newHeight > origImg->height) {
+		// Make the image larger
+		cvResetImageROI((IplImage*)origImg);
+		cvResize(origImg, outImg, CV_INTER_LINEAR);	// CV_INTER_CUBIC or CV_INTER_LINEAR is good for enlarging
+	}
+	else {
+		// Make the image smaller
+		cvResetImageROI((IplImage*)origImg);
+		cvResize(origImg, outImg, CV_INTER_AREA);	// CV_INTER_AREA is good for shrinking / decimation, but bad at enlarging.
+	}
+
+	return outImg;
 }
