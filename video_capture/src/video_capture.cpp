@@ -38,7 +38,9 @@ bool take_picture(video_capture::snapshot::Request& req,
     Mat frame, edges;
     cap >> frame;
     cvtColor(frame, edges, CV_BGR2GRAY);
-    std::string path="/opt/ros/indigo/catkin_ws/src/video_capture/src/data/2_" + (string)req.name + patch::to_string(count) + ".pgm"; 
+    
+    std::string under=patch::to_string(req.id) + "_";
+    std::string path="/opt/ros/indigo/catkin_ws/src/video_capture/src/data/" + under + (string)req.name + patch::to_string(count) + ".pgm"; 
     std::cout << "writing image in: " << path << std::endl;
     if (imwrite(path,edges))
     {

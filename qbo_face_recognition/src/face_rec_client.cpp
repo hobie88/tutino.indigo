@@ -75,6 +75,7 @@ int main (int argc, char **argv)
   sigaction(SIGINT, &sigIntHandler, NULL);
   //wait for the server 
   ac->waitForServer();
+  ROS_INFO("Server online");
   //subscribe to the topic of interest 
   ros::Subscriber sub = n.subscribe("fr_order", 1, frclientCallback);
   ros::spin();

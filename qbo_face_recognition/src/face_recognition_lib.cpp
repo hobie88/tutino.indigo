@@ -32,6 +32,9 @@
 #include <sys/stat.h>
 #include <ros/package.h> //to get pkg path
 
+
+#include <opencv2/imgproc/imgproc.hpp>
+
 using namespace std;
 static const char *faceCascadeFilename = "haarcascade_frontalface_alt.xml";   // Haar Cascade file, used for Face Detection.
 const std::string path = ros::package::getPath("qbo_face_recognition"); 	//D.Portugal => get pkg path
@@ -224,6 +227,15 @@ IplImage* FaceRecognitionLib::resizeImage(const IplImage *origImg, int newWidth,
 		origHeight = origImg->height;
 	}
 	if (newWidth <= 0 || newHeight <= 0 || origImg == 0 || origWidth <= 0 || origHeight <= 0) {
+	    // marco edit ***********************************
+	    std::cout << "foto: " << origImg->ID << std::endl;
+	   //cvNamedWindow( "check2", 1 );
+       //cvShowImage( "check2", origImg );
+       //cv::waitKey(30);
+       //std::string tmp;
+       // std::cin>>tmp;
+
+	    /**************************************************************************/
 		ROS_INFO("ERROR in resizeImage: Bad desired image size of %dx%d.", newWidth, newHeight);
 		exit(1);
 	}
@@ -350,6 +362,7 @@ bool FaceRecognitionLib::learn(const char *szFileTrain)
 	ROS_INFO("Loading the training images in '%s'", szFileTrain);
 	nTrainFaces = loadFaceImgArray(szFileTrain);
 	ROS_INFO("Got %d training images.\n", nTrainFaces);
+	
 	if( nTrainFaces < 2 )
 	{
 		fprintf(stderr,
@@ -357,7 +370,6 @@ bool FaceRecognitionLib::learn(const char *szFileTrain)
 		        "Input file contains only %d", nTrainFaces);
 		return false;
 	}
-
 	// do PCA on the training faces
 	doPCA();
 
@@ -616,12 +628,16 @@ int FaceRecognitionLib::loadFaceImgArray(const char * filename)
 
 		// load the face image
 		pfaceImg = cvLoadImage(imgFilename, CV_LOAD_IMAGE_GRAYSCALE);
+		if (pfaceImg!=NULL)
+		{
                 psizedImg = resizeImage(pfaceImg, faceWidth, faceHeight);
                 // Give the image a standard brightness and contrast, in case it was too dark or low contrast.
                 pequalizedImg = cvCreateImage(cvGetSize(psizedImg), 8, 1);	// Create an empty greyscale image
                 cvEqualizeHist(psizedImg, pequalizedImg);
 		faceImgArr[iFace] = pequalizedImg;
-                cvReleaseImage( &pfaceImg );cvReleaseImage( &psizedImg );   
+                cvReleaseImage( &pfaceImg );
+                cvReleaseImage( &psizedImg );
+        }   
 		if( !faceImgArr[iFace] )
 		{
 			fprintf(stderr, "Can\'t load image from %s\n", imgFilename);

@@ -26,3 +26,11 @@ for face learning :
 	rosrun  face_recognition qbo_face_learning.py
 
 TODO : a GUI interface, a publisher (name)
+
+
+TO TRAIN:
+run roscore
+run rosrun qbo_face_recognition Fserver
+run rosrun qbo_face_recognition Fclient
+rostopic pub -1 /fr_order qbo_face_recognition/FRClientGoal -- 3 "none"
+

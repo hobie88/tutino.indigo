@@ -115,7 +115,9 @@ include_directories(
 add_library(qbo_face_recognition_lib src/face_recognition_lib.cpp)
 
 ## Declare a cpp executable
-add_executable(Fserver src/face_recognition.cpp)
+#add_executable(Fserver src/face_recognition.cpp)
+add_executable (Fserver src/face_recognition.cpp)
+
 add_executable(Fclient src/face_rec_client.cpp)
 
 ## Add cmake target dependencies of the executable/library

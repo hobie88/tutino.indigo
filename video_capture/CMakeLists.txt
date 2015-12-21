@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
   message_generation
+#  boost
 )
 
 
@@ -120,6 +121,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(/usr/include/opencv2)
+include_directories(/usr/include/boost)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
@@ -135,14 +137,17 @@ include_directories(
 # add_dependencies(video_capture ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
+
  add_executable(video_capture src/video_capture.cpp)
  add_executable(save_image src/save_image.cpp)
+ add_executable(crop_image src/crop_image.cpp)
 
 add_dependencies(video_capture ${catkin_EXPORTED_TARGETS})
 add_dependencies(save_image ${catkin_EXPORTED_TARGETS})
+add_dependencies(crop_image ${catkin_EXPORTED_TARGETS})
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(video_capture ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_dependencies(video_capture ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(video_capture
@@ -151,7 +156,9 @@ add_dependencies(save_image ${catkin_EXPORTED_TARGETS})
  target_link_libraries(save_image
    ${catkin_LIBRARIES}
  )
-
+ target_link_libraries(crop_image
+   ${catkin_LIBRARIES}
+ )
 
 #############
 ## Install ##

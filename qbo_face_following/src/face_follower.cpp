@@ -115,7 +115,7 @@ void FaceFollower::onInit()
 	diff_u_=0;
 	kp_u_=0.0020; //0.0066
 	ki_u_=0;
-	kd_u_=0.0001;
+	kd_u_=0.005;
 	
 
 	//For head's tilt movement
@@ -124,7 +124,7 @@ void FaceFollower::onInit()
 	diff_v_=0;
 	kp_v_=0.0020;
 	ki_v_=0;
-	kd_v_=0.0001;
+	kd_v_=0.005;
 	
 
 	//For base's linear movement

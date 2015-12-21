@@ -15,8 +15,12 @@ int main(int argc, char* argv[])
     ros::ServiceClient client = nh.serviceClient<video_capture::snapshot>("take_picture");
     video_capture::snapshot srv;
     int num=0;
+    int id = 0;
     std::cout<<"Inserisci il nome da registrare: "<<std::endl;
     std::cin >> srv.request.name;
+    std::cout << "Inserisci un identificativo numerico: " << std::endl;
+    std::cin >> id;
+    srv.request.id=id;
     std::cout<<"E il numero di foto da salvare"<<std::endl;
     std::cin >> num;
     for (int i=0; i<num ; i++)

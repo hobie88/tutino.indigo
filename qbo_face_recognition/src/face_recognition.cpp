@@ -53,6 +53,7 @@ public:
     it_(nh_),
     as_(nh_, name, boost::bind(&FaceRecognition::executeCB, this, _1), false)
   {
+    count=0;
     cvNamedWindow("Input", CV_WINDOW_AUTOSIZE); 	// output screen
     cvInitFont(&font,CV_FONT_HERSHEY_PLAIN, 1.0, 4.0, 2,2,CV_AA);  
     textColor = CV_RGB(0,255,255);	// light blue text
@@ -80,7 +81,7 @@ public:
     //image_sub_ = it_.subscribe("/stereo/left/image_raw", 1, &FaceRecognition::imageCB, this);
     
     image_sub_ = it_.subscribe("/usb_cam/image_raw", 1, &FaceRecognition::imageCB, this);
-    name_pub = nh_.advertise<std_msgs::String>("/name_detected", 5);
+    name_pub = nh_.advertise<std_msgs::String>("/name_detected", 1);
     nh_.param<bool>("/qbo_face_recognition/recognize",recognize,true);
 
   }
@@ -107,7 +108,7 @@ public:
       as_.setPreempted();
       return;
     }
-    ros::Rate r(4);
+    ros::Rate r(5);
     //Storing the information about the current goal and reseting feedback and result variables  
     goal_argument_ = goal->order_argument;
     result_.order_id = goal->order_id;  
@@ -199,11 +200,11 @@ public:
     
     //to synchronize with executeCB function.
     //as far as the goal id is 0, 1 or 2, it's active and there is no preempting request, imageCB function is proceed.
-  // if (!as_.isActive() || goal_id_ > 2)   // marco edit
-  // if (!as_.isActive())
+//   if (!as_.isActive() || goal_id_ > 2)   // marco edit
+//   if (!as_.isActive())
   //      {
   //          ROS_ERROR("PRIMO IF CONDITION--as is not active");
-  //         return;
+//           return;
   //      }
         
     if(!mutex_.try_lock()) return;    
@@ -227,7 +228,7 @@ public:
       mutex_.unlock();
       return;
     }
-    ros::Rate r(4);   
+    ros::Rate r(10);   
     IplImage img_input = cv_ptr->image;
     IplImage *img= cvCloneImage(&img_input); 
     IplImage *greyImg;
@@ -362,6 +363,7 @@ public:
        nearest  = frl.trainPersonNumMat->data.i[iNearest];
        //get the desired confidence value from the parameter server
        ros::param::getCached("~confidence_value", confidence_value);
+       ros::param::getCached("~confidence_min", confidence_min);
        cvFree(&projectedTestFace);
        text_image.str("");
        if(confidence<confidence_value)
@@ -369,33 +371,40 @@ public:
           ROS_INFO("Confidence is less than %f was %f, detected face is not considered.",(float)confidence_value, (float)confidence);
           text_image << "Confidence is less than "<< confidence_value;
           cvPutText(img, text_image.str().c_str(), cvPoint(faceRect.x, faceRect.y + faceRect.height + 25), &font, textColor);
+          if(confidence<confidence_min)
+          {
+            std_msgs::String msg;
+            msg.data="collega";
+            name_pub.publish(msg);
+          }
        }
        else
        {
-          ROS_ERROR("CONFIDENCE OK!!!!!!!!!!!!!!");
-          std_msgs::String msg;
-          msg.data=frl.personNames[nearest-1].c_str(); //marco edit
-          text_image <<  frl.personNames[nearest-1].c_str()<<" is recognized";
-          cvPutText(img, text_image.str().c_str(), cvPoint(faceRect.x, faceRect.y + faceRect.height + 25), &font, textColor);
+          if( (frl.personNames[nearest-1].c_str() == (old)) )
+          {
+            count++;
+            if (count>15)
+                {
+                    std_msgs::String msg;
+                    msg.data=frl.personNames[nearest-1].c_str(); //marco edit
+                    text_image <<  frl.personNames[nearest-1].c_str()<<" is recognized";
+                    cvPutText(img, text_image.str().c_str(), cvPoint(faceRect.x, faceRect.y + faceRect.height + 25), &font, textColor);
 	  //goal is to recognize_once, therefore set as succeeded.
-          if(goal_id_==0)
-          {
-             result_.names.push_back(frl.personNames[nearest-1].c_str());
-             result_.confidence.push_back(confidence);
-             as_.setSucceeded(result_);
-             name_pub.publish(msg);
+            
+	                ROS_INFO("detected %s  confidence %f ",  frl.personNames[nearest-1].c_str(),confidence);              
+                    feedback_.names.clear();
+                    feedback_.confidence.clear();
+                    feedback_.names.push_back(frl.personNames[nearest-1].c_str());
+                    feedback_.confidence.push_back(confidence);
+                    as_.publishFeedback(feedback_);  
+                    name_pub.publish(msg);
+                    count =0;
+                }
+
           }
-          //goal is recognize continuous, provide feedback and continue.
-          else
-          {
-	     ROS_INFO("detected %s  confidence %f ",  frl.personNames[nearest-1].c_str(),confidence);              
-             feedback_.names.clear();
-             feedback_.confidence.clear();
-             feedback_.names.push_back(frl.personNames[nearest-1].c_str());
-             feedback_.confidence.push_back(confidence);
-             as_.publishFeedback(feedback_);  
-             name_pub.publish(msg);              
-          }
+          else count=0;
+          
+          old = frl.personNames[nearest-1].c_str();            
                              
        }
     
@@ -422,10 +431,13 @@ protected:
   int add_face_count; //help variable to count the number of training images already taken in the add_face_images goal
   FILE *trainFile; 
   double confidence_value;//a face recognized with confidence value higher than confidence_value threshold is accepted as valid.
+  double confidence_min;
   bool   show_screen_flag;//if output window is shown
   bool recognize;
   int    add_face_number; //the number of training images to be taken in add_face_images goal
+  std::string old;
   CvFont font;
+  int count;
   CvScalar textColor;
   ostringstream text_image;
   ros::NodeHandle nh_;

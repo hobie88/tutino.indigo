@@ -48,7 +48,11 @@ class talk():
 	#sentence=choice(["Tanti auguri di buon natale","ciao, come va?","heilà, come stai?","ciao umano, come va?","salve, come sta?","ciao io sono tutìno ", "ciao collega!"])
 	    global name
 	    if name != msg.data:
-	        sentence = "ciao" + msg.data;
+	        if msg.data == "Pietro":
+#	            sentence = "Salve capo" + choice([". come sta?",". come va?",". le auguro un buon natale", ". auguri di buon natale"]);
+	            sentence = "Baciamo le mani, potentissimo e illustrissimo pietro"
+	        else:
+	            sentence = "ciao" + msg.data + choice([". come stai?",". come va?",". ti auguro un buon natale", ". auguri di buon natale",". tanti auguri di buon natale"]);
 	        run_process("amixer -c 1 sset Mic,1 0%")
 	        os.system(it1_speak % sentence)
 	        run_process("amixer -c 1 sset Mic,1 75%")
