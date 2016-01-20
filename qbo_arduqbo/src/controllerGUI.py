@@ -137,6 +137,7 @@ class controllerGUI(wx.Frame):
         j = JointState()
         j.name = ["head_pan_joint", "head_tilt_joint", "left_eyelid_joint", "right_eyelid_joint"]
         j.position = [-self.pan.GetValue()/100.0, self.tilt.GetValue()/100.0, self.leftEye.GetValue()/100.0, self.rightEye.GetValue()/100.0]
+        rospy.logerr("pan_position: " + str(j.position[0]) + " tilt_position: " + str(j.position[1]) ) #MARCO EDIT
         self.cmd_joints.publish(j)
         # send base updates
         t = Twist()

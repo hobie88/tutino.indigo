@@ -21,8 +21,7 @@
 	 <param name="/qbo_face_following/search_min_tilt" value="0.0" /> 
 	 <param name="/qbo_face_following/search_max_tilt" value="-0.5" />
    <param name="/qbo_face_following/search_tilt_vel" value="0.25" /> 
-   <param name="/qbo_face_following/desired_distance" value="1.6" /> 
-
+   <param name="/qbo_face_following/desired_distance" value="1.0" /> 
 
 	 <!-- launch_recognition Fserver-->
   <node pkg="qbo_face_recognition"  name="qbo_face_recognition" type="Fserver" output="screen" >

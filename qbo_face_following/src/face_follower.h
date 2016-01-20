@@ -125,6 +125,24 @@ private:
 	float kd_yaw_;
 	float max_angular_speed_;
 
+	float pan_pos;         //Grande
+	float tilt_pos;        //Grande
+	float e_hor_act;           //Grande
+	float e_vert_act;           //Grande
+	float e_hor_prev;          //Grande
+	float e_vert_prev;          //Grande
+	float e_hor_act_der;       //Grande
+	float e_vert_act_der;       //Grande
+	float e_hor_act_int;       //Grande
+	float e_vert_act_int;       //Grande
+	float t_act;           //Grande
+	float t_prev;          //Grande
+	float left_to_right;   //Grande
+	float up_to_down;   //Grande
+	float deltaT;       //Grande
+	float pippo_act;         //Grande
+	float pippo;         //Grande
+
 	/*
 	 * Callbacks
 	 */
@@ -157,6 +175,7 @@ private:
 	 * PID control function
 	 */
 	float controlPID(float x, float ix, float dx, float Kp, float Ki, float Kd);
+	float control_PID(float x, float ix, float dx, float Kp, float Ki, float Kd); //Grande
 
 public:
 

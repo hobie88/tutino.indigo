@@ -112,6 +112,7 @@ include_directories(
 ## Declare a cpp executable
 add_executable(qbo_face_following src/face_follower.cpp)
 add_executable(speed_checker src/speed_checker.cpp)
+add_executable(qbo_fake_detector src/fake_detector.cpp)
 
 
 ## Add cmake target dependencies of the executable/library
@@ -120,6 +121,9 @@ add_executable(speed_checker src/speed_checker.cpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(qbo_face_following
+   ${catkin_LIBRARIES}
+ )
+  target_link_libraries(qbo_fake_detector
    ${catkin_LIBRARIES}
  )
 

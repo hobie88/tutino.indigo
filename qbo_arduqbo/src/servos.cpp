@@ -66,7 +66,7 @@ void CServo::setAngle(float ang, float velocity)
 {
     if (ang > max_angle_ || ang < min_angle_)
     {
-        ROS_WARN_STREAM("Servo " << name_ << ": angle out of range (" << ang << ").Limits are: " << min_angle_ << "," << max_angle_);
+ //       ROS_WARN_STREAM("Servo " << name_ << ": angle out of range (" << ang << ").Limits are: " << min_angle_ << "," << max_angle_);
         //return;
         ang=std::min(ang,max_angle_);
         ang=std::max(ang,min_angle_);
@@ -163,7 +163,7 @@ void DynamixelServo::setAngle(float ang, float velocity)
 
     if (ang > max_angle_ || ang < min_angle_)
     {
-        ROS_WARN_STREAM("Servo " << name_ << ": angle out of range (" << ang << ").Limits are: " << min_angle_ << "," << max_angle_);
+//        ROS_WARN_STREAM("Servo " << name_ << ": angle out of range (" << ang << ").Limits are: " << min_angle_ << "," << max_angle_);
         ang=std::min(ang,max_angle_);
         ang=std::max(ang,min_angle_);
     }
@@ -257,7 +257,7 @@ void PrintCommStatus(int CommStatus)
         break;
 
     case COMM_RXTIMEOUT:
-        ROS_WARN("COMM_RXTIMEOUT: There is no status packet!");
+        //ROS_WARN("COMM_RXTIMEOUT: There is no status packet!"); // MARCO EDIT - commented
         break;
 
     case COMM_RXCORRUPT:

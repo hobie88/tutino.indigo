@@ -163,9 +163,9 @@ void FaceDetector::onInit()
 	//Publisher of the face tracking position and size
 	face_position_and_size_pub_=private_nh_.advertise<qbo_face_msgs::FacePosAndDist>("/qbo_face_tracking/face_pos_and_dist", 10);
 	//Publisher of the face image
-	face_pub_ = private_nh_.advertise<sensor_msgs::Image>("/qbo_face_tracking/face_image", 1);
+	face_pub_ = private_nh_.advertise<sensor_msgs::Image>("/qbo_face_tracking/face_image", 100);
 	//Publisher of the viewer, using image transport for compression
-	viewer_image_pub_ = it_.advertise("/qbo_face_tracking/viewer", 1);
+	viewer_image_pub_ = it_.advertise("/qbo_face_tracking/viewer", 100);
 	//Publisher of the nose color
 //	nose_color_pub_ = private_nh_.advertise<qbo_arduqbo::Nose>("/cmd_nose", 1);
 
@@ -452,8 +452,10 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 	if(undetected_count_<undetected_threshold_) //If head have been recently detected, use Kalman filter prediction
 	{
 		message.face_detected = true;
+
 		message.u = kalman_filter_.statePost.at<float>(0,0) - cv_ptr->image.cols/2.;
 		message.v = kalman_filter_.statePost.at<float>(1,0) - cv_ptr->image.rows/2.;
+
 //		message.distance_to_head = float(head_distance);
 		message.distance_to_head = head_distance;
 	}

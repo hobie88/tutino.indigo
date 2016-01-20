@@ -213,6 +213,7 @@ public:
 
     // publish the image
     image_pub_.publish(img_, *ci);
+    //sleep(0.5);  //Grande
 
     return true;
   }

@@ -47,8 +47,9 @@ using namespace std;
 class FaceRecognition
 {
 public:
-    
-  FaceRecognition(std::string name) : 
+
+//In the FaceRecognition constructor, an action server is created. The action server takes arguments of a node handle, name of the FaceRecognition, and optionally an executeCB. In this example the action server is created with the arguments for the executeCB.
+  FaceRecognition(std::string name) :
     frl(),
     it_(nh_),
     as_(nh_, name, boost::bind(&FaceRecognition::executeCB, this, _1), false)
@@ -243,7 +244,7 @@ public:
     // Make sure a valid face was detected.
     if (faceRect.width < 1) 
     {
-      ROS_ERROR("No face was detected in the last frame"); 
+      //ROS_ERROR("No face was detected in the last frame");
       text_image.str(""); 
       text_image <<"No face was detected. ";
       cvPutText(img, text_image.str().c_str(), cvPoint(10, faceRect.y + 50), &font, textColor);
@@ -339,7 +340,7 @@ public:
      // if( goal_id_<2 )      // marco edit
      if (recognize)
     {
-       ROS_ERROR("WITHIN RECOGNIZE");
+      // ROS_ERROR("WITHIN RECOGNIZE");
        int iNearest, nearest;
        float confidence;
        float * projectedTestFace=0;
