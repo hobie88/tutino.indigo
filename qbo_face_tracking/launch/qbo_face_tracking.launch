@@ -1,8 +1,9 @@
 <launch>	
-	 <node name="qbo_face_tracking" pkg="qbo_face_tracking" type="qbo_face_tracking" output="screen" >
+    <include file="$(find qbo_arduqbo)/launch/qbo_arduqbo_default.launch" /> 
+	 <node name="new_face_tracking" pkg="qbo_face_tracking" type="new_face_tracking" output="screen" >
 
 		 <!-- <param name="face_classifier_path" value="0" /> -->
-                 <param name="alternative_face_classifier_path" value="/usr/share/opencv/haarcascades/haarcascade_profileface.xml" />
+              <!--   <param name="alternative_face_classifier_path" value="/usr/share/opencv/haarcascades/haarcascade_profileface.xml" /> -->
 		 <!-- <param name="default_pos_x" value="0" /> -->
 	 	<!-- <param name="default_pos_y" value="10" /> -->
 		 <param name="check_Haar" value="5" /> 
@@ -11,5 +12,7 @@
 		 <!-- <param name="distance_threshold" value="5.0" /> -->
 	 <!-- <param name="send_to_recognizer" value="false" /> -->	
 	 </node>
+	 <!-- launch video streamer -->
+	<include file="$(find usb_cam)/launch/usb_cam-test.launch" />
 </launch>
 

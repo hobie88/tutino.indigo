@@ -24,6 +24,7 @@
  
 #include <driver/qboduino_driver.h>
 
+
 CQboduinoDriver::CQboduinoDriver(std::string port1, int baud1, std::string port2, int baud2, float timeout1, float timeout2) :
     firstDevice(), secondDevice(), timeout1_(timeout1*1000), timeout2_(timeout2*1000)
 {

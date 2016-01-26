@@ -1,5 +1,4 @@
 /*
- * Software License Agreement (GPLv2 License)
  * 
  * Copyright (c) 2012 Thecorpora, Inc.
  *

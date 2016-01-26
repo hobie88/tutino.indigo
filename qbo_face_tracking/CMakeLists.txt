@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 #	OpenCV
 #)
 
+set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -103,6 +105,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(/usr/include/opencv)
+include_directories(/usr/include/opencv2)
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
@@ -115,6 +118,7 @@ include_directories(
 ## Declare a cpp executable
 # add_executable(qbo_face_tracking_node src/qbo_face_tracking_node.cpp)
 add_executable(qbo_face_tracking src/face_detector.cpp)
+add_executable(new_face_tracking src/new_face_detector.cpp)
 
 #add_executable(face_image_viewer src/face_image_viewer.cpp)
 
@@ -124,6 +128,9 @@ add_executable(qbo_face_tracking src/face_detector.cpp)
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(qbo_face_tracking
+   ${catkin_LIBRARIES}
+)
+ target_link_libraries(new_face_tracking
    ${catkin_LIBRARIES}
 )
 

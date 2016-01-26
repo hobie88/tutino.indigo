@@ -50,13 +50,13 @@ void FaceFollower::setROSParams()
 	//Parameters that define the movement when Qbo is searching for faces
 	private_nh_.param("/qbo_face_following/search_min_pan", search_min_pan_, -0.3);
 	private_nh_.param("/qbo_face_following/search_max_pan", search_max_pan_, 0.3);
-	private_nh_.param("/qbo_face_following/search_pan_vel", search_pan_vel_, 0.3);
+	private_nh_.param("/qbo_face_following/search_pan_vel", search_pan_vel_, 2.0);
 	//private_nh_.param("/qbo_face_following/search_max_tilt", search_max_tilt_, 0.7);
 	//private_nh_.param("/qbo_face_following/search_min_tilt", search_min_tilt_, 0.7);
 	private_nh_.param("/qbo_face_following/search_max_tilt", search_max_tilt_, 0.5);
 	private_nh_.param("/qbo_face_following/search_min_tilt", search_min_tilt_, 0.5);
-	private_nh_.param("/qbo_face_following/search_tilt_vel", search_tilt_vel_, 0.3);
-	private_nh_.param("/qbo_face_following/desired_distance", desired_distance_, 0.2);
+	private_nh_.param("/qbo_face_following/search_tilt_vel", search_tilt_vel_, 2.0);
+	private_nh_.param("/qbo_face_following/desired_distance", desired_distance_, 1.0);
 	//private_nh_.param("/qbo_face_following/desired_distance", desired_distance_, 5.0);
 	private_nh_.param("/qbo_face_following/send_stop", send_stop_, true);
 }
@@ -114,18 +114,18 @@ void FaceFollower::onInit()
 	u_act_=0;
 	u_prev_=0;
 	diff_u_=0;
-	kp_u_=1; //0.0066
+	kp_u_=0.00; //0.0066
 	ki_u_=0.1;
-	kd_u_=0.00;
+	kd_u_=0.1;
 	
 
 	//For head's tilt movement
 	v_act_=0;
 	v_prev_=0;
 	diff_v_=0;
-	kp_v_=1;
+	kp_v_=0.00;
 	ki_v_=0.1;
-	kd_v_=0.00;
+	kd_v_=0.1;
 	
 
 	//For base's linear movement
@@ -269,13 +269,13 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 
 		u_act_=head_pos_size->u;
 		diff_u_=u_act_-u_prev_;
-		//pan_vel=controlPID(u_act_,0,diff_u_,kp_u_,ki_u_,kd_u_);  Grande commented
-		//u_prev_=u_act_; Grande commented
+		pan_vel=controlPID(u_act_,0,diff_u_,kp_u_,ki_u_,kd_u_);
+		u_prev_=u_act_;
 
 		v_act_=head_pos_size->v;
 		diff_v_= v_act_-v_prev_;
-		//tilt_vel=controlPID(v_act_,0,diff_v_,kp_v_,ki_v_,kd_v_); Grande commented
-		//v_prev_=v_act_; Grande commented
+		tilt_vel=controlPID(v_act_,0,diff_v_,kp_v_,ki_v_,kd_v_);
+		v_prev_=v_act_;
 
 		//////////////////////////////////////////////////////////////////////////////////////// Grande begin
 		/*
@@ -305,8 +305,10 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		///////////////////////////////////////////////////////////////////////////////////////// Grande end
 
 		///////////////////////////////////////////////////////////////////////////////Grande begin
-		pan_vel = atan2((diff_u_ - p_.at<float>(0,2)),p_.at<float>(0,0));
-		tilt_vel = atan2((diff_v_ - p_.at<float>(1,2)),p_.at<float>(1,1));
+		//pan_vel = atan2((diff_u_ - p_.at<float>(0,2)),p_.at<float>(0,0));
+		//tilt_vel = atan2((diff_v_ - p_.at<float>(1,2)),p_.at<float>(1,1));
+		//pan_vel = 1.5;
+		//tilt_vel = 1.5;
 		///////////////////////////////////////////////////////////////////////////////Grande end
 
 		if(move_head_bool_)
@@ -336,10 +338,7 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		//ROS_INFO("*******distance to head: %f",head_pos_size->distance_to_head);
 		distance_act_ = (head_pos_size->distance_to_head)-desired_distance_;
 		diff_distance_=distance_act_-distance_prev_;
-		//linear_vel=controlPID(distance_act_,0,diff_distance_,kp_distance_,ki_distance_,kd_distance_);
-		linear_vel=controlPID(distance_act_,0,diff_distance_,kp_distance_,ki_distance_,0.0);
-//		ROS_ERROR("distance to head: %lg - desired_distance: %lg", head_pos_size->distance_to_head, desired_distance_);
-//		ROS_ERROR("distance_act: %lg, diff_distance: %lg, linear_vel: %lg", distance_act_,diff_distance_,linear_vel);
+		linear_vel=controlPID(distance_act_,0,diff_distance_,kp_distance_,ki_distance_,kd_distance_);
 		distance_prev_=distance_act_;
 
 		bool head_near_to_border = ((head_pos_size->v)+(head_pos_size->image_height/2))<100;
@@ -419,16 +418,18 @@ void FaceFollower::facePositionCallback(const qbo_face_msgs::FacePosAndDistConst
 		//face_detected_count_=0;
 
 		srand(time(NULL));
-		float rand_tilt = search_min_tilt_+((search_max_tilt_-search_min_tilt_)/20.0) * double(rand()%20);
-		float rand_pan = search_min_pan_+((search_max_pan_-search_min_pan_)/20.0) * double(rand()%20);
+		float rand_tilt = search_min_tilt_+((search_max_tilt_-search_min_tilt_) * double(rand()%20)/20.);
+		float rand_pan = search_min_pan_+((search_max_pan_-search_min_pan_) * double(rand()%20)/20.);
+		float rand_tilt_vel = search_tilt_vel_ * double((rand()%20)/20.);
+		float rand_pan_vel = search_pan_vel_ * double((rand()%20)/20.);
 
 
-		ROS_INFO("Randomly moving head: pos(%lg, %lg) and vel(%lg, %lg)", rand_tilt, rand_pan, search_tilt_vel_, search_pan_vel_);
+		ROS_INFO("Randomly moving head: pos(%lg, %lg) and vel(%lg, %lg)", rand_tilt, rand_pan, rand_tilt_vel, rand_pan_vel);
 
 		if(move_head_bool_)
 		{
 		//	ROS_ERROR("move_head_bool_ is true");
-			setHeadPositionGlobal(rand_tilt, rand_pan, 0.5, 0.5);
+			setHeadPositionGlobal(rand_tilt, rand_pan, rand_tilt_vel, rand_pan_vel);
 		//	setHeadPositionGlobal(rand_tilt, rand_pan, 0.0001, 0.0001); // MARCO
 		}
 		//TODO - Analyse this
@@ -451,8 +452,8 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 	
 	//float pan_pos,tilt_pos;  Grande: defined in FaceFollower.h as member of the class
 
-	//pan_pos = pos_leftright+ image_width_/2;
-	//tilt_pos = pos_updown+ image_height_/2;
+	//pan_pos = pos_leftright + image_width_/2;  //Grande: commented because image_width_/2 was subtracted in the face_detector
+	//tilt_pos = pos_updown + image_height_/2;   //Grande: commented because image_height_/2 was subtracted in the face_detector
 	pan_pos = pos_leftright;
 	tilt_pos = pos_updown;
 
@@ -462,8 +463,8 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 //	printf("Angle pos: %lg. Yaw from joint: %lg \n", pan_pos, yaw_from_joint_);
 
 
-	//pan_pos = yaw_from_joint_- pan_pos;              //Grande:commented because the robot is stopped, it was minus
-	//tilt_pos = tilt_pos + pitch_from_joint_;        //Grande:commented because the robot is stopped
+	pan_pos = yaw_from_joint_+ pan_pos;              //Grande:commented because the robot is stopped, it was minus
+	tilt_pos = - tilt_pos + pitch_from_joint_;        //Grande:commented because the robot is stopped
 
 
 //	printf("SUM: %lg\n", pan_pos);
@@ -505,7 +506,7 @@ void FaceFollower::setHeadPositionToFace(float pos_updown, float pos_leftright, 
 	//	joint_state.position[1]=-1.5;  //Grande commented
 
 
-	joint_state.position[1]=-tilt_pos;   //Grande decommented // MARCO ADDED A MINUS
+	joint_state.position[1]= -tilt_pos;   //Grande decommented // MARCO ADDED A MINUS
 
 	joint_state.velocity[1]=vel_updown;
 

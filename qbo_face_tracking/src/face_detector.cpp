@@ -70,11 +70,11 @@ void FaceDetector::setROSParams()
 	//Setting default path of the Haar cascade classifier
 	string default_classifier_path = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt2.xml";
         //string alternative_classifier_path = "/usr/share/OpenCV-2.3.1/haarcascades/haarcascade_profileface.xml";
-        string alternative_classifier_path = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
+    string alternative_classifier_path = "/usr/share/opencv/haarcascades/haarcascade_frontalface_alt.xml";
 
 	//Set default parameter for face classifier path
 	private_nh_.param("/qbo_face_tracking/face_classifier_path", face_classifier_path_, default_classifier_path);
-        private_nh_.param("/qbo_face_tracking/alternative_face_classifier_path", alternative_face_classifier_path_, alternative_classifier_path);
+    private_nh_.param("/qbo_face_tracking/alternative_face_classifier_path", alternative_face_classifier_path_, alternative_classifier_path);
 	//default_pos refers to the head position when head is not found
 	private_nh_.param<double>("/qbo_face_tracking/default_pos_x", default_pos_.x, double(0));
 	private_nh_.param<double>("/qbo_face_tracking/default_pos_y", default_pos_.y, double(10));
@@ -452,10 +452,10 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 	if(undetected_count_<undetected_threshold_) //If head have been recently detected, use Kalman filter prediction
 	{
 		message.face_detected = true;
-
-		message.u = kalman_filter_.statePost.at<float>(0,0) - cv_ptr->image.cols/2.;
-		message.v = kalman_filter_.statePost.at<float>(1,0) - cv_ptr->image.rows/2.;
-
+		//message.u = kalman_filter_.statePost.at<float>(0,0) - cv_ptr->image.cols/2.;  //Grande commented
+		//message.v = kalman_filter_.statePost.at<float>(1,0) - cv_ptr->image.rows/2.;  //Grande commented
+		message.u = kalman_filter_.statePost.at<float>(0,0) - cv_ptr->image.cols/2. - detected_face_roi_.width/2;
+		message.v = kalman_filter_.statePost.at<float>(1,0) - cv_ptr->image.rows/2. - detected_face_roi_.height/2.;
 //		message.distance_to_head = float(head_distance);
 		message.distance_to_head = head_distance;
 	}

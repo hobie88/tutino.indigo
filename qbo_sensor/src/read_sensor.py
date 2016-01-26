@@ -11,7 +11,6 @@ wall_distance = Point32()
 floor_distance = 0.0
 left_distance = 0.0
 right_distance = 0.0
-count = 0
 
 class read_sensor:
 
@@ -36,15 +35,12 @@ class read_sensor:
     def leftSensorCallback(self, data):
         global left_distance
         left_distance = data.points[0].x
-        print 'LEFT SENSOR = ' + str(Decimal(data.points[0].x))
+        print 'LEFT SENSOR = ' + str(data.points[0].x)
         
     def rightSensorCallback(self, data):
         global right_distance 
         right_distance = data.points[0].x
-        print 'RIGHT SENSOR = ' + str(data.points[0].x)
-        global count
-        count = count +1
-        print 'COUNT = ' + str(count)   
+        print 'RIGHT SENSOR = ' + str(data.points[0].x)   
         
 if __name__ == '__main__':
     try:

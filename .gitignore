@@ -25,6 +25,9 @@ msg/_*.py
 .project
 .cproject
 
+#images for face recognition
+.pgm
+
 # qcreator stuff
 CMakeLists.txt.user
 

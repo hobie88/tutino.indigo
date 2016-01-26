@@ -4,6 +4,8 @@ import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist, Point32
 
+# data.x = right_distance, data.y = left_distance, data.z = floor_distance
+
 constant_left_wrong_value = 0.0
 zero_flag = True
 
@@ -24,7 +26,7 @@ def callback(data):
     if constant_left_wrong_value != data.y:
         rospy.loginfo('OSTACOLO !!  VADO INDIETRO E GIRO A DESTRA')
         t.angular.z = -0.5
-        t.linear.x = -0.15      
+        t.linear.x = -0.15 
     elif (data.x >= wdrs or data.x == 0.0) and data.z >= 0.23 and data.z < 0.26:
         rospy.loginfo('STO ANDANDO DRITTO')
         t.linear.x = 0.15
