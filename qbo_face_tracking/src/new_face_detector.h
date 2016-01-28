@@ -38,9 +38,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-#include <string>
-#include<iostream>
-
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -81,6 +78,7 @@ private:
 	double search_tilt_vel_;
 	double desired_distance_;
 	int undetected_threshold_;
+	bool first_time_;
 //	double distance_threshold_;
 //	bool send_to_face_recognizer_;
 //	bool print_recognized_face_;
@@ -130,10 +128,18 @@ private:
 	cv::Mat kalman_estimate_state_;
 	vector<float> head_distances_;
 	cv::Mat p_;
+	//kalman filter stuff:
+	cv::Mat meas_;
+	cv::Mat state_;
+	bool found_;
+	int notFoundCount_;
+	double ticks_;
+
 
 	int loop_counter_;
 	float face_ratio_;
 	int undetected_count_;
+	bool random_;
 
 	bool dynamic_check_haar_;
 	int cam_shift_detected_count_;
@@ -179,6 +185,8 @@ private:
 	float calcDistanceToHead(cv::Mat& head, cv::KalmanFilter& kalman_filter);
 	void deleteROSParams();
 	void debug();
+	float scalePan(float);
+	float scaleTilt(float);
 
 public:
 	FaceDetector();

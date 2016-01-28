@@ -119,6 +119,8 @@ include_directories(
 # add_executable(qbo_face_tracking_node src/qbo_face_tracking_node.cpp)
 add_executable(qbo_face_tracking src/face_detector.cpp)
 add_executable(new_face_tracking src/new_face_detector.cpp)
+add_executable(face_detector_test src/face_detector_test.cpp)
+add_executable(controller src/controller.cpp)
 
 #add_executable(face_image_viewer src/face_image_viewer.cpp)
 
@@ -130,10 +132,16 @@ add_executable(new_face_tracking src/new_face_detector.cpp)
  target_link_libraries(qbo_face_tracking
    ${catkin_LIBRARIES}
 )
+ target_link_libraries(controller
+   ${catkin_LIBRARIES}
+)
  target_link_libraries(new_face_tracking
    ${catkin_LIBRARIES}
 )
 
+ target_link_libraries(face_detector_test
+   ${catkin_LIBRARIES}
+)
 #target_link_libraries(face_image_viewer ${catkin_LIBRARIES})
 
 #############
