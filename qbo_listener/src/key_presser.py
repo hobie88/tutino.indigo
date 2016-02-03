@@ -1,55 +1,48 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import rospy
-import roslib
-import os
-import subprocess
-from std_msgs.msg import String
+# NOTE: this example requires PyAudio because it uses the Microphone class
 
-#Speech Recognition libs
 import speech_recognition as sr
+from espeak import espeak
 
-#Constants definition
-INFILE_WAV = 'presser.wav'
-REC = "rec -r 48000 -c 1 " + INFILE_WAV + " silence 0 1 0:00:01 2% silence 0 1 00:00:03 0%"
+import pyaudio
 
 
-def listener():
-    pub = rospy.Publisher("key_pressed",String,queue_size=1)
-    rospy.init_node("key_logger",anonymous=True)
-    rate = rospy.Rate(10)
-    while not rospy.is_shutdown():
-        currentString = recordAndListenAudio()
-        if keywordEn(currentString):
-            rospy.loginfo("Keyword Trovata!")
-            pub.publish(currentString)
-        rate.sleep()
-        
-        
-def recordAndListenAudio():
-    rospy.loginfo("Recording audio...")
-    os.system(REC)
-    rospy.loginfo("Audio Recorded!")
-    rospy.loginfo("Sample stored into %s" %INFILE_WAV)
-    r = sr.Recognizer()
-    with sr.WavFile(INFILE_WAV) as source:
-        audioBuffer = r.record(source)
-    try:
-        decodedString = r.recognize_google(audioBuffer, language = 'it')
-    except:
-        decodedString = "no keyword"
-    return decodedString
+if espeak.set_voice("mb-it4"):
+    canSpeak = True
+else:
+    canSpeak = False
     
-def keywordEn(bufString):
-    if "ciao" in bufString:
-        return True
+def speakTutino(string):
+    if canSpeak:
+        espeak.synth(buffString)
     else:
-        return False
+        print(buffString)
 
-if __name__ == '__main__':
-    try:
-        listener()
-    except rospy.ROSInterruptException:
-        pass
+r = sr.Recognizer()
+print("mic and recognizer initialized")
+with sr.Microphone() as source:
+    r.adjust_for_ambient_noise(source,2) # we only need to calibrate once, before we start listening
     
+buffString = ""  
+i=0
+while i<5:
+    with sr.Microphone() as source:
+        audio = r.record(source,3)
+    
+    print("Recognizing...")
+    try:
+        buffString = r.recognize_google(audio, language='it')
+    except sr.UnknownValueError:    #Audio cannot be recognized by the used SRE
+        buffString = "No audio"
+        pass
+    except sr.RequestError: #key is invalid
+        buffString = "Used Key is invalid!"
+        pass
+   
+    if "ciao" in buffString:
+        print(buffString)
+        break
+    else:
+        print(buffString)
 
