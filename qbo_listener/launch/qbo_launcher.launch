@@ -1,0 +1,7 @@
+<launch>
+
+  <!-- launch qbo_listener-->
+  <node name="qbo_listener" pkg="qbo_listener" type="qbo_listener" output="screen">
+  </node>
+
+</launch>
