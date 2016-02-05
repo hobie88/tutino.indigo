@@ -30,6 +30,7 @@
 #include <cmath>
 #include "ros/ros.h"
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/Point32.h>	//MARCO
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/console.h>
@@ -46,6 +47,7 @@ class CBaseController : public CController
     protected:
         ros::Subscriber twist_sub_;
         ros::Publisher odom_pub_;
+        ros::Publisher my_odom_pub_;	//MARCO
         ros::ServiceServer stall_unlock_service_;
         ros::ServiceServer base_stop_service_;
         tf::TransformBroadcaster odom_broadcaster_;

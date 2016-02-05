@@ -1,83 +1,136 @@
 #!/usr/bin/env python
 
-import rospy
+#ROS Import
+import ros
 import roslib
-import os
-import subprocess
+import rospy
 from std_msgs.msg import String
 
-#Speech Recognition libs
+from sys import byteorder
+from array import array
+from struct import pack
+
+import pyaudio
+import wave
 import speech_recognition as sr
+import time
+from collections import  deque
+import threading
 
-#Constants definition
-INFILE_WAV = 'presser.wav'
-REC = "rec -r 48000 -c 1 " + INFILE_WAV + " silence 0 1 0:00:01 2% silence 0 1 00:00:03 0%"
 
+THRESHOLD = 500
+CHUNK_SIZE = 1024
+RATE = 48000
+LANGUAGE = "it"
 
-def listener():
-    pub = rospy.Publisher("vocal_move",String,queue_size=1)
-    rospy.init_node("qbo_listener",anonymous=True)
-    r = sr.Recognizer()
-    command = ""
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source,2)    #calibrate recognizer
-        
-#   file = open("phrases.txt","w")    
+def isSilent(sndData):
+    return max(sndData) < THRESHOLD
     
-    while not rospy.is_shutdown():
-        with sr.Microphone() as source:
-            audio = r.record(source, 3) # record for 3 seconds
-        print("Recognizing...")
-        try:
-            buffString = r.recognize_google(audio, language='it')
-        except sr.UnknownValueError:    #Audio cannot be recognized by the used SRE
-            buffString = "No audio"
-            pass
-        except sr.RequestError: #key is invalid
-            buffString = "Used Key is invalid!"
-            pass
-#        file.write(buffString+"\n")
-#        file.flush()
-        buffString = buffString.lower() #lower case to all the chars
-        print(buffString)
-        if "tutino" in buffString:
-            if analyze(buffString):
-                pub.publish(command)
-                print ("publishing: " + command)
-#                file.close()
-            
+def normalize(sndData):
+    MAXIMUM = 16384
+    times = float(MAXIMUM) / max(abs(i) for i in sndData)
+    r = array('h')
+    for i in sndData:
+        r.append(int(i*times))
+    return r
 
+
+#
+#
+#
+
+audioQueue = deque()
+stringList = []
+recordFlag = True
+recogFlag = True
+
+def record(recog):
+    while recordFlag:
+        print("Recording:")
+        if (len(audioQueue) < 4):
+            with sr.Microphone() as source:
+                try:
+                    #audio = recog.record(source,3)
+                    audio = recog.record(source,5)    #Better than listen
+                    audioQueue.append(audio)
+                except:
+                    pass
+        else:
+            print("I am not listening")
+        
+
+def recognizeAudio(recog):
+    while recogFlag:
+        print("Trying to Understand")
+        try:
+#            audioBuffer = audioQueue.pop()
+            audioBuffer = audioQueue.popleft()
+            decodedString = recog.recognize_google(audioBuffer, language = LANGUAGE)
+        except sr.UnknownValueError:    #Audio not recognized
+            decodedString = False
+        except sr.RequestError:    #Key or Internet-bound error
+            decodedString = False
+        except IndexError:    #AudioQueue is empty but for some reason we got here
+            time.sleep(1)    #Wait for the Record thread to give some data
+            decodedString = False
+        if decodedString:
+            stringList.append(decodedString)    #Store decoded Strings into a list
+            cmd = analyze(decodedString)    #If decoded String is meaningful
+            pub.publish(cmd)
+            
+def stopAll():
+    global recogFlag
+    global recordFlag
+    counter = 0
+    while recordFlag or recogFlag:
+        for element in stringList[counter:]:
+            counter += 1    #So this thread checks only unchecked elements
+            if ("fermati" in element) or ("cancaro" in element) or ("stop" in element):
+                recordFlag = False    #Stop Recording man
+                while len(audioQueue) > 0:    #Until buffer is > 0, work!
+                    pass
+                recogFlag = False
+                with open("strings.txt", "a") as buffText:
+                    for element in stringList:
+                        buffText.write("%s - %d \n" %(element,time.time()))
+               
+            
 def analyze(buffString):    
     if ("gira" in buffString):
         if ("destra" in buffString):
             #gira a destra
             command = "destra"
-            return True
         elif ("sinistra" in buffString):
             #gira a sinistra
             command = "sinistra"
-            return True
     elif ("girati" in buffString) or ("voltati" in buffString):
         #gira di 180
         command = "180"
-        return True
     elif ("indietro" in buffString):
         #vai indietro
         command = "indietro"
-        return True
     elif ("avanti" in buffString):
         #vai avanti
         command = "avanti"
-        return True
     else:
         #non e' un comando valido
-        return False
+        return ""
+    return command
    
-
-if __name__ == '__main__':
-    try:
-        listener()
-    except rospy.ROSInterruptException:
-        pass
     
-
+if __name__ == "__main__":
+    pub = rospy.Publisher("vocal_move",String,queue_size=3)
+    rospy.init_node("qbo_listener",anonymous=True)
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Adjusting Mic Level")
+        r.adjust_for_ambient_noise(source,2)
+        print("Adjustment Done!")
+    startTime = time.time()
+    recordThread = threading.Thread(target=record, args=(r,))
+    recordThread.start()
+    recognizerThread = threading.Thread(target=recognizeAudio, args=(r,))
+    recognizerThread.start()
+    stopAllThread = threading.Thread(target=stopAll)
+    stopAllThread.start()
+    

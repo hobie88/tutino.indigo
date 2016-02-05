@@ -47,6 +47,7 @@ CBaseController::CBaseController(std::string name, CQboduinoDriver *device_p, ro
     twist_sub_ = nh.subscribe<geometry_msgs::Twist>(topic, 1, &CBaseController::twistCallback, this);
 //create odometry publisher
     odom_pub_ = nh.advertise<nav_msgs::Odometry>(odom_topic, 1);
+    my_odom_pub_ = nh.advertise<geometry_msgs::Point32>("my_odom", 1);	//MARCO
 
 //advertize services
     stall_unlock_service_ = nh.advertiseService("unlock_motors_stall", &CBaseController::unlockStall,this);
@@ -104,6 +105,13 @@ void CBaseController::timerCallback(const ros::TimerEvent& e)
     //Get position
     float x,y,th;
     int code=device_p_->getOdometry(x,y,th);
+    /***** MARCO EDIT *******/
+    geometry_msgs::Point32 msg;
+    msg.x=x;
+    msg.y=y;
+    msg.z=th;
+    my_odom_pub_.publish(msg);
+    /**** MARCO EDIT END *****/
     if(code<0)
     {
 	ROS_ERROR_STREAM("Unable to get odometry from the base controler board " << code);
