@@ -78,6 +78,8 @@ def vocal_move_callback(cmd):
 
     elif 'avanti' in cmd.data:
         move(t,[0.2,0,0],[0,0,0],'lin')
+    elif 'stop' in cmd.data:
+        move(t,[0,0,0],[0,0,0],'lin')
     print (cmd.data)
         
 #updates x,y position in the floor plane and orientation from odometry

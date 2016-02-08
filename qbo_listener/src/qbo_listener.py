@@ -45,36 +45,42 @@ recordFlag = True
 recogFlag = True
 
 def record(recog):
+    global audioQueue
     while recordFlag:
         print("Recording:")
-        if (len(audioQueue) < 4):
-            with sr.Microphone() as source:
-                try:
-                    #audio = recog.record(source,3)
-                    audio = recog.record(source,5)    #Better than listen
-                    audioQueue.append(audio)
-                except:
-                    pass
-        else:
-            print("I am not listening")
+#        if (len(audioQueue) < 3):
+        with sr.Microphone() as source:
+            try:
+                     #audio = recog.record(source,3)
+                audio = recog.record(source,3)    #Better than listen
+                audioQueue.append(audio)
+            except:
+                pass
+#        else:
+#            print("I am not listening")
         
 
 def recognizeAudio(recog):
+    global audioQueue
     while recogFlag:
-        print("Trying to Understand")
-        try:
+        
+        if len(audioQueue) > 0:
+            print("Trying to Understand")
+            try:
+#            audioBuffer = audioQueue.select(len(audioQueue - 1))
 #            audioBuffer = audioQueue.pop()
-            audioBuffer = audioQueue.popleft()
-            decodedString = recog.recognize_google(audioBuffer, language = LANGUAGE)
-        except sr.UnknownValueError:    #Audio not recognized
-            decodedString = False
-        except sr.RequestError:    #Key or Internet-bound error
-            decodedString = False
-        except IndexError:    #AudioQueue is empty but for some reason we got here
-            time.sleep(1)    #Wait for the Record thread to give some data
-            decodedString = False
-        if decodedString:
-            stringList.append(decodedString)    #Store decoded Strings into a list
+                audioBuffer = audioQueue.popleft()
+                print("queue len: " + str(len(audioQueue)))
+                decodedString = recog.recognize_google(audioBuffer, language = LANGUAGE)
+            except sr.UnknownValueError:    #Audio not recognized
+                decodedString = ""
+            except sr.RequestError:    #Key or Internet-bound error
+                decodedString = ""
+            except IndexError:    #AudioQueue is empty but for some reason we got here
+                time.sleep(1)    #Wait for the Record thread to give some data
+                decodedString = ""
+            if decodedString:
+                stringList.append(decodedString)    #Store decoded Strings into a list
             cmd = analyze(decodedString)    #If decoded String is meaningful
             pub.publish(cmd)
             
@@ -85,7 +91,8 @@ def stopAll():
     while recordFlag or recogFlag:
         for element in stringList[counter:]:
             counter += 1    #So this thread checks only unchecked elements
-            if ("fermati" in element) or ("cancaro" in element) or ("stop" in element):
+           # if ("fermati" in element) or ("cancaro" in element) or ("stop" in element):
+            if "cancaro" in element:
                 recordFlag = False    #Stop Recording man
                 while len(audioQueue) > 0:    #Until buffer is > 0, work!
                     pass
@@ -106,12 +113,14 @@ def analyze(buffString):
     elif ("girati" in buffString) or ("voltati" in buffString):
         #gira di 180
         command = "180"
-    elif ("indietro" in buffString):
+    elif ("dietro" in buffString):
         #vai indietro
         command = "indietro"
     elif ("avanti" in buffString):
         #vai avanti
         command = "avanti"
+    elif (("stop" in buffString)or("fermati" in buffString)):
+        command = "stop"
     else:
         #non e' un comando valido
         return ""
@@ -130,7 +139,9 @@ if __name__ == "__main__":
     recordThread = threading.Thread(target=record, args=(r,))
     recordThread.start()
     recognizerThread = threading.Thread(target=recognizeAudio, args=(r,))
+    recognizerThread2 = threading.Thread(target=recognizeAudio, args=(r,))
     recognizerThread.start()
+    recognizerThread2.start()
     stopAllThread = threading.Thread(target=stopAll)
     stopAllThread.start()
     
