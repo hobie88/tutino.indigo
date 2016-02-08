@@ -35,6 +35,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
     //Initialize and create object for all controlled servos
     if(nh_.hasParam("controlledservos"))
     {
+    	ROS_ERROR("WITHIN CONTROLLED SERVOS");
       std::map< std::string, XmlRpc::XmlRpcValue >::iterator it;
       std::map< std::string, XmlRpc::XmlRpcValue > value;
       XmlRpc::MyXmlRpcValue servos;
@@ -55,6 +56,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
     //Initialize and create object for all Un-controlled servos
     if(nh_.hasParam("uncontrolledservos"))
     {
+    	ROS_ERROR("WITHIN UNCONTROLLED SERVOS");
       std::map< std::string, XmlRpc::XmlRpcValue >::iterator it;
       std::map< std::string, XmlRpc::XmlRpcValue > value;
       XmlRpc::MyXmlRpcValue servos;

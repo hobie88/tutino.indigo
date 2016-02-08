@@ -47,6 +47,7 @@
 //#include <qbo_face_msgs/RecognizeFace.h>
 //#include <qbo_face_msgs/GetName.h>
 //#include <qbo_arduqbo/Nose.h>
+#include <std_msgs/Float32.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
 
@@ -101,6 +102,7 @@ private:
 
 	ros::Publisher joint_pub_;
 	ros::Publisher base_control_pub_;
+	ros::Publisher face_distance_pub_;
 
 	/*
 	 * Elements for the face recognition client

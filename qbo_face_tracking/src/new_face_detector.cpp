@@ -103,7 +103,10 @@ void FaceDetector::onInit()
 	//Publisher of the head joint positions
 	joint_pub_=private_nh_.advertise<sensor_msgs::JointState>("/cmd_joints",1);
 	//Publisher of the body movements
-	base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1);
+	//base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1);
+	base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/pre_cmd_vel",1);
+	face_distance_pub_=private_nh_.advertise<std_msgs::Float32>("/head_distance",1);
+
 
 	/*
 	 * Initialize some internal parameters values
@@ -210,7 +213,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
              // <<<< Matrix A
 
              state_ = kalman_filter_.predict();
-             cout << "State post:" << endl << state_ << endl;
+             //cout << "State post:" << endl << state_ << endl;
              cv::Rect predRect;
              predRect.width = state_.at<float>(4);
              predRect.height = state_.at<float>(5);
@@ -227,7 +230,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
     if (!face_detected_bool_)
     {
     	notFoundCount_++;
-        cout << "notFoundCount:" << notFoundCount_ << endl;
+        //cout << "notFoundCount:" << notFoundCount_ << endl;
         if( notFoundCount_ >= 10 )
         {
 
@@ -271,7 +274,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
                 kalman_filter_.correct(meas_); // Kalman Correction
 
 
-             cout << "Measure matrix:" << endl << meas_ << endl;
+           //  cout << "Measure matrix:" << endl << meas_ << endl;
           }
 
 
@@ -284,7 +287,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 			head_distance=head_distances_[0];//100;
 	  }
 		else
-		  head_distance = 5;
+		  head_distance = 3.0;
 
 
 	}
@@ -318,12 +321,18 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 
     head_distance=head_distance/head_distances_.size();
 
-	ROS_ERROR ("HEAD DISTANCE AFTER MEAN COMPUTING: %f",head_distance);
+	//ROS_ERROR ("HEAD DISTANCE AFTER MEAN COMPUTING: %f",head_distance);
 
 
 #ifdef marco_debug
 	ROS_INFO("updated undetected count");
 #endif
+	if(head_distance != head_distance) //not a number
+		head_distance=3.0;
+	//Create HeadDistance message
+	std_msgs::Float32 head_distance_msgs;
+	head_distance_msgs.data=head_distance;
+	face_distance_pub_.publish(head_distance_msgs);
 	//Create Face Pos and Size message
 	sensor_msgs::JointState message;
 	int servos_count=2;
@@ -348,7 +357,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 		message.position[1]=rand_tilt;
 		message.velocity[0]=search_pan_vel_;
 		message.velocity[1]=search_tilt_vel_;
-		ROS_ERROR("RANDOM MOVE: tilt: %f  pan: %f",rand_tilt,rand_pan);
+		//ROS_ERROR("RANDOM MOVE: tilt: %f  pan: %f",rand_tilt,rand_pan);
 		random_=true;
 	}
 	else
@@ -375,7 +384,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 			message.velocity[0]=abs(pan_pos*1.3);
 			message.velocity[1]=abs(tilt_pos*1.5);
 		}
-		ROS_ERROR("KALMAN MOVE: pan: %f --- tilt: %f",message.position[0], message.position[1]);
+		//ROS_ERROR("KALMAN MOVE: pan: %f --- tilt: %f",message.position[0], message.position[1]);
 		random_=false;
 	}
 
@@ -566,7 +575,8 @@ void FaceDetector::sendBaseVelocity(float head_distance)
 	if(random_) // stop body
 	{
 
-		message.linear.x=0;
+		//message.linear.x=0;
+		message.linear.x=0.2;
 		message.linear.y=0;
 		message.linear.z=0;
 		message.angular.x=0;
