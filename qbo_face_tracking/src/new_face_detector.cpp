@@ -106,6 +106,8 @@ void FaceDetector::onInit()
 	//base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/cmd_vel",1);
 	base_control_pub_=private_nh_.advertise<geometry_msgs::Twist>("/pre_cmd_vel",1);
 	face_distance_pub_=private_nh_.advertise<std_msgs::Float32>("/head_distance",1);
+	//publisher for the face image
+	face_detected_pub_ = private_nh_.advertise<sensor_msgs::Image>("/detected_face",1);
 
 
 	/*
@@ -185,6 +187,10 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
         	//ROS_INFO("HAAR CLASSIFIER FOUND A FACE");
         	face_detected_bool_ = true;
         	track_object_ = false;
+        	// publish face image to topic "/face_detected"
+        	sensor_msgs::Image image_msg;
+        	image_msg=*cv_ptr->toImageMsg();
+        	face_detected_pub_.publish(image_msg);
 
         		//Changed
         	detected_face_roi_ = faces_roi[0];

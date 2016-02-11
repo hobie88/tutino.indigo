@@ -52,6 +52,7 @@
 #include <geometry_msgs/Twist.h>
 
 #define HEAD_SIZE 0.20
+#define ENCODING sensor_msgs::image_encodings::RGB8
 
 //#define WITH_GPU
 
@@ -103,6 +104,7 @@ private:
 	ros::Publisher joint_pub_;
 	ros::Publisher base_control_pub_;
 	ros::Publisher face_distance_pub_;
+	ros::Publisher face_detected_pub_;
 
 	/*
 	 * Elements for the face recognition client
