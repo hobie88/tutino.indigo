@@ -297,6 +297,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 #ifdef marco_debug
 		ROS_ERROR ("COMPUTED HEAD DISTANCE: %f",head_distance);
 #endif
+
 	}
 
     if(head_distances_.size()==0)
@@ -329,6 +330,8 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 #endif
 	if(head_distance != head_distance) //not a number
 		head_distance=3.0;
+
+
 	//Create HeadDistance message
 	std_msgs::Float32 head_distance_msgs;
 	head_distance_msgs.data=head_distance;
@@ -399,6 +402,7 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 #ifdef marco_debug
 	ROS_INFO("publishing: pan_pos: %lg --- tilt_pos: %lg",message.position[0],message.position[1]);
 #endif
+ROS_INFO("PAN: %lg -- TILT: %lg",message.position[0],message.position[1]);
 	joint_pub_.publish(message);
 
 	sendBaseVelocity(head_distance);
@@ -576,7 +580,7 @@ void FaceDetector::sendBaseVelocity(float head_distance)
 	{
 
 		//message.linear.x=0;
-		message.linear.x=0.2;
+		message.linear.x=0.1;
 		message.linear.y=0;
 		message.linear.z=0;
 		message.angular.x=0;
@@ -602,6 +606,7 @@ void FaceDetector::sendBaseVelocity(float head_distance)
 		message.angular.z=angular;
 	}
 	base_control_pub_.publish(message);
+//ROS_ERROR("linear: %f, angular: %f",message.linear.x,message.angular.z);
 	//ROS_INFO("Head Distance: %f",head_distance);
 }
 

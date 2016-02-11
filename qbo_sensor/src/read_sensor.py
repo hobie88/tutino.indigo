@@ -15,7 +15,7 @@ right_distance = 0.0
 class read_sensor:
 
     def __init__(self):
-        rospy.Subscriber('/distance_sensors_state/floor_sensor', PointCloud, self.floorSensorCallback)
+        #rospy.Subscriber('/distance_sensors_state/floor_sensor', PointCloud, self.floorSensorCallback)
         rospy.Subscriber('/distance_sensors_state/front_left_srf10', PointCloud, self.leftSensorCallback)
         rospy.Subscriber('/distance_sensors_state/front_right_srf10', PointCloud, self.rightSensorCallback)
         pub = rospy.Publisher('wall_distance', Point32, queue_size=10)
@@ -36,11 +36,13 @@ class read_sensor:
         global left_distance
         left_distance = data.points[0].x
         print 'LEFT SENSOR = ' + str(data.points[0].x)
+       # print 'LEFT SENSOR.1= ' + str(data.channel[0])
         
     def rightSensorCallback(self, data):
         global right_distance 
         right_distance = data.points[0].x
         print 'RIGHT SENSOR = ' + str(data.points[0].x)   
+        #print 'RIGHT SENSOR.1= ' + str(data.points[0].z)
         
 if __name__ == '__main__':
     try:

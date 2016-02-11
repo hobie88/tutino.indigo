@@ -22,6 +22,7 @@
  */
 
 #include <driver/arduqbo_instructions.h>
+#include <iostream>
 
 //TODO: Comentar el código
 
@@ -180,6 +181,7 @@ int CComando::deserialize(std::string inData, std::vector<dataUnion>& recivedDat
     uint8_t* data_p=(uint8_t *)(inData.c_str());
     for (int i=0;i<inDataLen;i++)
     {
+
         switch(inType[i])
         {
             case 'b':

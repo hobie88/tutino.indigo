@@ -94,6 +94,8 @@ private:
 	float distance_from_obstacle;                    //distanza fra il robot e l'ostacolo
 	float distance_from_head;                        //distanza fra il robot e il volto agganciato
 	float obst_to_goal;                              //distanza fra l'ostacolo e il volto agganciato
+	float route1;                                    //segmento che il robot DOVREBBE percorrere per aggirare l'ostacolo a destra
+	float route2;                                    //segmento che il robot DOVREBBE percorrere per aggirare l'ostacolo a sinistra
 	float route;                                     //segmento che il robot deve percorrere per aggirare l'ostacolo
 	ros::Time t_begin;                               //istante in cui vedo l'ostacolo la prima volta
 	ros::Duration t_end;                             //tempo necessario a percorrere il tratto che mi permette di evitare l'ostacolo
@@ -111,6 +113,20 @@ private:
 	int cycle_left;
 	bool reg_pos;
 	bool floor_obstacle;                             //indica se c'è un ostacolo basso (sensore a infrarossi)
+	float x_prev;
+	float y_prev;
+	float x_flag_prev;
+	float y_flag_prev;
+	bool flag;
+	float flag_distance;
+	float first_call;
+	bool trash;   //buttare
+	string rotation;
+	bool rotation_right_left;
+	bool rotation_check;
+	float alfa;
+	float beta;
+	//bool going_right;
 	boost::mutex mutex;
 
 
