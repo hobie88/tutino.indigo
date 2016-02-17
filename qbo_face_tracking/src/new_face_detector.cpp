@@ -402,9 +402,8 @@ void FaceDetector::imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr)
 #ifdef marco_debug
 	ROS_INFO("publishing: pan_pos: %lg --- tilt_pos: %lg",message.position[0],message.position[1]);
 #endif
-ROS_INFO("PAN: %lg -- TILT: %lg",message.position[0],message.position[1]);
 	joint_pub_.publish(message);
-
+	//ROS_ERROR("JOint state yaw_from_joint_: %f",yaw_from_joint_);
 	sendBaseVelocity(head_distance);
 
 }

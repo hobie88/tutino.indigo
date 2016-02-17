@@ -39,6 +39,7 @@ CJointController::CJointController(std::string name, CQboduinoDriver *device_p, 
 void CJointController::jointCallback(const sensor_msgs::JointState::ConstPtr& msg)
 {
     ROS_DEBUG_STREAM("Joint move");
+    //ROS_ERROR("head: %f, %f",msg->position[0],msg->position[1]); // MARCO
     joint_msg_=*msg;
     joints_dirty_=true;
     // clean up and log values

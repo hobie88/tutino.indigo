@@ -93,7 +93,7 @@ void CBaseController::twistCallback(const geometry_msgs::Twist::ConstPtr& msg)
     v_angular_=(float)msg->angular.z;
     v_dirty_=true;
     // clean up and log values
-    ROS_DEBUG_STREAM("Twist move: linear=" << v_linear_ << " angular=" << v_angular_);
+    //ROS_ERROR("Twist move: linear= %f angular= %f",v_linear_, v_angular_); // marco
 }
 
 void CBaseController::timerCallback(const ros::TimerEvent& e)

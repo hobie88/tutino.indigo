@@ -77,6 +77,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
 //Initialize and create object for all dynamixel servos
     if(nh_.hasParam("dynamixelservo"))
     {
+    	ROS_ERROR("WITHIN DYNAMIXEL SERVOS");
       //Start dynamixel port
       if( dxl_initialize(const_cast<char *>(dmxPort_.c_str()), 1) == 0 )
       {
@@ -119,7 +120,9 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
         XmlRpc::XmlRpcValue controller_params=(*it).second;
         if(controller_params.hasMember("type"))
         {
+
           std::string type=controller_params["type"];
+
           //Joint controller
           if(type.compare("joint_controller")==0)
           {
@@ -142,7 +145,7 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
             ROS_INFO("mics_controller started");
             controllersList_.push_back(new CMicsController((*it).first, this, nh));
           }
-	  else if(type.compare("base_controller")==0)
+          else if(type.compare("base_controller")==0)
           {
             ROS_INFO("base_controller started");
             controllersList_.push_back(new CBaseController((*it).first, this, nh));
@@ -178,10 +181,9 @@ CSerialController::CSerialController(std::string port1, int baud1, std::string p
     }
     //The following lines setup the joint state publisher at the given rate
     std::string topic;
-    nh_.param("joint_states_topic", topic, std::string("joint_states"));
+    nh_.param("joint_states_topic", topic, std::string("/joint_states"));
     joint_pub_ = nh_.advertise<sensor_msgs::JointState>(topic, 1);
     timer_=nh_.createTimer(ros::Duration(1/rate_),&CSerialController::timerCallback,this);
-
 }
 
 CSerialController::~CSerialController()

@@ -26,10 +26,11 @@
 
 CNoseController::CNoseController(std::string name, CQboduinoDriver *device_p, ros::NodeHandle& nh) : CController(name,device_p,nh)
 {
+
     std::string topic;
     nh.param("controllers/"+name+"/topic", topic, std::string("cmd_nose"));
     nose_sub_ = nh.subscribe<std_msgs::UInt8>(topic, 1, &CNoseController::setNose,this);
-    ros::spin();
+    //ros::spin(); // doen not need to spin (Marco)
 
 }
 
