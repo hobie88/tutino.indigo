@@ -5,6 +5,8 @@ from geometry_msgs.msg import Twist, Point32
 from sensor_msgs.msg import PointCloud
 from std_msgs.msg import Float32 
 from decimal import Decimal
+from sensor_msgs.msg import Image
+import Image
 
 wall_distance = Point32()
 # wall_distance.x=right_distance, wall_distance.y=left_distance, wall_distance.z=floor_distance 
@@ -18,6 +20,7 @@ class read_sensor:
         #rospy.Subscriber('/distance_sensors_state/floor_sensor', PointCloud, self.floorSensorCallback)
         rospy.Subscriber('/distance_sensors_state/front_left_srf10', PointCloud, self.leftSensorCallback)
         rospy.Subscriber('/distance_sensors_state/front_right_srf10', PointCloud, self.rightSensorCallback)
+        rospy.Subscriber('/face_detected',Image,self.callback)
         pub = rospy.Publisher('wall_distance', Point32, queue_size=10)
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
@@ -43,6 +46,11 @@ class read_sensor:
         right_distance = data.points[0].x
         print 'RIGHT SENSOR = ' + str(data.points[0].x)   
         #print 'RIGHT SENSOR.1= ' + str(data.points[0].z)
+        
+    def callback(self, data):
+        print('callback called')
+        image = Image.open(data.data)
+        image.show()
         
 if __name__ == '__main__':
     try:

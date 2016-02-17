@@ -22,11 +22,11 @@ msg/_*.py
 *.wikidoc
 
 # eclipse stuff
-.project
-.cproject
+*.project
+*.cproject
 
 #images for face recognition
-.pgm
+*.pgm
 
 # qcreator stuff
 CMakeLists.txt.user
@@ -37,9 +37,9 @@ srv/_*.py
 qtcreator-*
 *.user
 
-/planning/cfg
-/planning/docs
-/planning/src
+/planning/cfg/
+/planning/docs/
+/planning/src/
 
 *~
 
