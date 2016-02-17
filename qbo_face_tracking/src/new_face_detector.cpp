@@ -94,8 +94,9 @@ void FaceDetector::onInit()
 	/*
 	 * Subscribers of the node
 	 */
-	info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/usb_cam/camera_info",10,&FaceDetector::infoCallback, this);
+	//info_sub_=private_nh_.subscribe<sensor_msgs::CameraInfo>("/usb_cam/camera_info",10,&FaceDetector::infoCallback, this);
 	joint_states_sub_=private_nh_.subscribe<sensor_msgs::JointState>("/joint_states",10,&FaceDetector::jointStateCallback, this);
+	image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/qbo_cam/image",1,&FaceDetector::imageCallback, this);
 
 	/*
 	 * Publishers of the node
@@ -116,36 +117,6 @@ void FaceDetector::onInit()
 
 	//Initialize Kalman filter
 	initializeKalmanFilter();
-}
-
-
-void FaceDetector::infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info)
-{
-#ifdef marco_debug
-	ROS_INFO("infocallback called");
-#endif
-	if(p_.data==NULL)
-	{
-
-		cv::Mat p=cv::Mat(3,4,CV_64F); // CV_64F : simple (3x4 array) grayscale image
-		for (int i=0;i<3;i++)
-		{
-			for (int j=0;j<4;j++)
-			{
-				p.at<double>(i,j)=info->P[4*i+j];
-			}
-		}
-		p(cv::Rect(0,0,3,3)).convertTo(p_,CV_32F); //CV_32F is float
-												//the pixel can have any value between 0-1.0,
-												//this is useful for some sets of calculations on data
-												//but it has to be converted into 8bits to save or
-												//display by multiplying each pixel by 255.
-
-
-		image_sub_=private_nh_.subscribe<sensor_msgs::Image>("/usb_cam/image_raw",1,&FaceDetector::imageCallback, this);
-		info_sub_.shutdown();
-		//TODO - Unsubscribe to the camera info topic // done
-	}
 }
 
 

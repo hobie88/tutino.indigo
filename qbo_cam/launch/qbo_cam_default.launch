@@ -1,0 +1,4 @@
+<launch>
+  <node name="qbo_cam" pkg="qbo_cam" type="qbo_cam.py" output="screen" respawn="true">
+  </node>
+</launch>

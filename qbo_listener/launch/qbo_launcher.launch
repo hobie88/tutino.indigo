@@ -1,7 +1,9 @@
 <launch>
 
   <!-- launch qbo_listener-->
-  <node name="qbo_listener" pkg="qbo_listener" type="qbo_listener" output="screen">
+  <node name="qbo_listener" pkg="qbo_listener" type="qbo_listener.py" output="screen">
+  </node>
+  <node name="vocal_move" pkg="qbo_listener" type="vocal_move.py" output="screen">
   </node>
 
 </launch>

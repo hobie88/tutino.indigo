@@ -1,5 +1,4 @@
 <launch>	
-    <include file="$(find qbo_arduqbo)/launch/qbo_arduqbo_default.launch" /> 
 	 <node name="new_face_tracking" pkg="qbo_face_tracking" type="new_face_tracking" output="screen" >
 
 		 <!-- <param name="face_classifier_path" value="0" /> -->
@@ -12,7 +11,6 @@
 		 <!-- <param name="distance_threshold" value="5.0" /> -->
 	 <!-- <param name="send_to_recognizer" value="false" /> -->	
 	 </node>
-	 <!-- launch video streamer -->
-	<include file="$(find usb_cam)/launch/usb_cam-test.launch" />
+
 </launch>
 
