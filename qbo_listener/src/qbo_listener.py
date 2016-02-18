@@ -5,6 +5,7 @@ import ros
 import roslib
 import rospy
 from std_msgs.msg import String
+from std_msgs.msg import UInt8
 
 from sys import byteorder
 from array import array
@@ -16,12 +17,17 @@ import speech_recognition as sr
 import time
 from collections import  deque
 import threading
+import signal
+import sys
+from gi.overrides.Gdk import Color
 
 
 THRESHOLD = 500
 CHUNK_SIZE = 1024
 RATE = 48000
 LANGUAGE = "it"
+maxAudioLen = 2
+GOOGLE_KEY="AIzaSyApW6YIzdZzA5b2Ttc4qp0goVLPQg5z_xQ"
 
 def isSilent(sndData):
     return max(sndData) < THRESHOLD
@@ -38,7 +44,9 @@ def normalize(sndData):
 #
 #
 #
-
+GREEN = 2
+RED = 1
+OFF = 0
 audioQueue = deque()
 stringList = []
 recordFlag = True
@@ -47,46 +55,57 @@ recogFlag = True
 def record(recog):
     global audioQueue
     while recordFlag:
-        print("Recording:")
-#        if (len(audioQueue) < 3):
-        with sr.Microphone() as source:
-            try:
-                     #audio = recog.record(source,3)
-                audio = recog.record(source,3)    #Better than listen
-                audioQueue.append(audio)
-            except:
-                pass
+        if (len(audioQueue) < maxAudioLen):
+            #print("\nRecording:")
+            with sr.Microphone() as source:
+                try:
+                         #audio = recog.record(source,3)
+                    audio = recog.record(source,8)    #Better than listen
+                    print("Recording end \n")
+                    audioQueue.append(audio)
+                except:
+                    pass
+        else:
+            continue
 #        else:
 #            print("I am not listening")
-        
+
+def noseCmd(color):
+    msg=UInt8()
+    msg.data=color
+    nose_pub.publish(msg)        
 
 def recognizeAudio(recog):
     global audioQueue
     global stringList
     while recogFlag:
-        
         if len(audioQueue) > 0:
             print("Trying to Understand")
             try:
-#            audioBuffer = audioQueue.select(len(audioQueue - 1))
-#            audioBuffer = audioQueue.pop()
                 audioBuffer = audioQueue.popleft()
-                print("queue len: " + str(len(audioQueue)))
-                decodedString = recog.recognize_google(audioBuffer, language = LANGUAGE)
+                #print("queue len: " + str(len(audioQueue)))
+                decodedString = recog.recognize_google(audioBuffer, language = LANGUAGE, key=GOOGLE_KEY)
             except sr.UnknownValueError:    #Audio not recognized
                 decodedString = ""
+                noseCmd(OFF)
             except sr.RequestError:    #Key or Internet-bound error
                 decodedString = ""
+                noseCmd(OFF)
             except IndexError:    #AudioQueue is empty but for some reason we got here
                 time.sleep(1)    #Wait for the Record thread to give some data
                 decodedString = ""
+                noseCmd(OFF)
             if decodedString:
                 stringList.append(decodedString)    #Store decoded Strings into a list
-                print("decoded: "+str(decodedString))
+                rospy.logerr("decoded: "+decodedString)
+                noseCmd(GREEN)
             cmd = analyze(decodedString)    #If decoded String is meaningful
             pub.publish(cmd)
             
 def stopAll():
+    '''
+    It is basically a loop that stops the execution of the overall node when some keywords are recognized
+    '''
     global recogFlag
     global recordFlag
     counter = 0
@@ -99,12 +118,18 @@ def stopAll():
                 while len(audioQueue) > 0:    #Until buffer is > 0, work!
                     pass
                 recogFlag = False
-                with open("strings.txt", "a") as buffText:
-                    for element in stringList:
-                        buffText.write("%s - %d \n" %(element,time.time()))
+            with open("strings.txt", "a") as buffText:
+                for element in stringList:
+                    buffText.write("%s - %d \n" %(element,time.time()))
                
             
-def analyze(buffString):    
+def analyze(buffString):   
+    '''
+    Input:
+        String buffString: It is the decoded string given by the SRE.
+    Return:
+        String being the cmd that is going to be published on ROS
+    ''' 
     if ("gira" in buffString):
         if ("destra" in buffString):
             #gira a destra
@@ -130,20 +155,20 @@ def analyze(buffString):
    
     
 if __name__ == "__main__":
-    pub = rospy.Publisher("vocal_move",String,queue_size=3)
     rospy.init_node("qbo_listener",anonymous=True)
+    pub = rospy.Publisher("vocal_move",String,queue_size=3)
+    nose_pub = rospy.Publisher("/cmd_nose",UInt8,queue_size=2)
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Adjusting Mic Level")
         r.adjust_for_ambient_noise(source,2)
         print("Adjustment Done!")
-    startTime = time.time()
+    #startTime = time.time()
     recordThread = threading.Thread(target=record, args=(r,))
     recordThread.start()
     recognizerThread = threading.Thread(target=recognizeAudio, args=(r,))
-    recognizerThread2 = threading.Thread(target=recognizeAudio, args=(r,))
     recognizerThread.start()
-    recognizerThread2.start()
     stopAllThread = threading.Thread(target=stopAll)
     stopAllThread.start()
+    signal.signal(signal.SIGINT, sys.exit(0))
     
