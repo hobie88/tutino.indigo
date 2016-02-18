@@ -1,5 +1,5 @@
 #include "new_face_detector.h"
-#define marco_debug
+//#define marco_debug
 
 
 

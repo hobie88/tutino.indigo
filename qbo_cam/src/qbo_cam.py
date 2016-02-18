@@ -23,11 +23,10 @@ class QboCam:
         #init Publishers
         self.image_pub = rospy.Publisher("/qbo_cam/image",Image,queue_size=10)
         self.info_pub = rospy.Publisher("/qbo_cam/info",CameraInfo,queue_size=5)
-        self.send_camera_info()
-        self.cap
         if not self.cap.isOpened():
             self.cap.open()
         while True: #start capturing video
+            self.send_camera_info()
             self.capture()
             
 
@@ -61,11 +60,14 @@ class QboCam:
         info_msg = CameraInfo()
         info_msg.width = 640
         info_msg.height= 480
-        info_msg.P=numpy.zeros((3,4))
-        for i in range(0,3):
-            for j in range (0,4):
-                if (i == j):
-                    info_msg.P[i][j]=1.0
+        # P is the projection Matrix
+        info_msg.P=numpy.zeros(12)
+        info_msg.P[0]=485.706413
+        info_msg.P[2]=162.982482
+        info_msg.P[5]=485.706413
+        info_msg.P[6]=142.542517
+        info_msg.P[10]=1.0000
+        
         self.info_pub.publish(info_msg)
         
     def close(self, signal, frame):

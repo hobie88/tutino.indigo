@@ -6,6 +6,7 @@
 #include "qbo_move_base.h"
 #include <cmath>
 #include <exception>
+//#define DEBUG
 
 
 MoveBase::MoveBase(): range(5.0)
@@ -210,7 +211,9 @@ void MoveBase::floorSensorCallback(const sensor_msgs::PointCloudConstPtr& floor_
 	float floor_sensor_measure = floor_sensor->points[0].x;
 	geometry_msgs::Twist base_vel;
 	if((floor_sensor_measure < hill_threshold) || (floor_sensor_measure > well_threshold)) {
+#ifdef DEBUG
 		ROS_INFO("C'è un dosso o una cunetta");
+#endif
 		floor_obstacle = true;
 		base_vel.linear.x = 0.0;
 		base_vel.angular.z = -0.3;
@@ -313,7 +316,9 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 
 		if(((is_obstacle || rotation_check) && (sensor_cycle < 2.0)) /*&& (rotation_recheck == 0) &&&& going_right*/) {         //se c'è un ostacolo
 			if(!was_obstacle) {   //se è la prima volta che vedo un ostacolo fermo il robot
+#ifdef DEBUG
 				ROS_INFO("Vedo l'ostacolo per la prima volta");
+#endif
 				obst_to_goal = distance_from_head - distance_from_obstacle;
 				if(reg_pos == true) {
 					z_obst = z_now;
@@ -323,7 +328,9 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 					base_vel.angular.z = 0;  //fermo il robot perché ho regolato la posizione ---> il robot non deve più ruotare per posizionarsi perpendicolarmente all'ostacolo
 				}
 			} else {                     //eseguo le operazioni per vedere il punto in cui finisce l'ostacolo
+#ifdef DEBUG
 					ROS_INFO("Eseguo le operazioni per vedere il punto in cui finisce l'ostacolo");
+#endif
 					z_step = z_now - z_obst;
 					if(((z_step <= 1.57) && (z_step >= -1.57)) || half_step) {   //1,57 radianti (90°) è l'angolo oltre il quale non considero più l'ostacolo come presente
 						base_vel.linear.x = 0;
@@ -355,7 +362,9 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 								base_vel.angular.z = 0.2;
 								base_vel.linear.x = 0.0;
 							} else {
+#ifdef DEBUG
 								ROS_INFO("Ci sono ostacoli dappertutto: mi volto e torno indietro");
+#endif
 								right_all_obstacle = false;
 								left_all_obstacle = false;
 								is_obstacle = false;
@@ -372,11 +381,15 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 
 			}
 		} else if(right_obstacle && (sensor_cycle == 0) && (completed == true)) {
+#ifdef DEBUG
 			ROS_INFO("Vedo un ostacolo solo a destra");
+#endif
 			base_vel.angular.z = 0.5;
 			base_vel.linear.x = 0.2;
 		} else if(left_obstacle && (sensor_cycle == 0) && (completed == true)){
+#ifdef DEBUG
 			ROS_INFO("Vedo un ostacolo solo a sinistra");
+#endif
 			base_vel.angular.z = -0.5;
 			base_vel.linear.x = 0.2;
 		} else {            //se NON c'è ostacolo
@@ -387,9 +400,13 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 					if(((y_now - y_flag_prev)*(y_now - y_flag_prev) + (x_now - x_flag_prev)*(x_now - x_flag_prev)) < ((flag_distance-OBSTACLE_DISTANCE-0.1)*(flag_distance-OBSTACLE_DISTANCE-0.1))) {
 						base_vel.linear.x= 0.5;
 						base_vel.angular.z= 0;    //vado in linea retta
+#ifdef DEBUG
 						ROS_INFO("Vado verso il volto");
+#endif
 					}else {
+#ifdef DEBUG
 						ROS_INFO("Sono fermo vicino al volto");
+#endif
 						base_vel.linear.x= 0;
 						flag=false; // sono ferma, sono vicino il volto
 						stop = true;
@@ -397,18 +414,24 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 					}
 				}else{
 					if((stop == true) && ((ros::Time::now() - begin).operator<(range))) {
+#ifdef DEBUG
 						ROS_INFO("Sono fermo per cinque secondi");
+#endif
 						base_vel.linear.x = 0.0;
 						base_vel.angular.z = 0.0;
 					} else {
+#ifdef DEBUG
 						ROS_INFO("Riparto");
+#endif
 						base_vel.linear.x = speed.x;
 						base_vel.angular.z = speed.z;
 					}
 				}
 			} else {
 				if((alfa != 0.0) && ((z_now - z_obst) > alfa)) {
+#ifdef DEBUG
 					ROS_INFO("Ritorno verso destra perché quello è il percorso minore");
+#endif
 					base_vel.angular.z = -1.5;
 					base_vel.linear.x = 0.0;
 					is_obstacle = false;
@@ -429,14 +452,18 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 						first_call = false;
 					}
 					if(((y_now - y_prev)*(y_now - y_prev) + (x_now - x_prev)*(x_now - x_prev)) < (route*route)) {
+#ifdef DEBUG
 						ROS_INFO("Percorro il tratto per evitare l'ostacolo");
+#endif
 						base_vel.linear.x= 0.4;
 						base_vel.angular.z= 0;    //vado in linea retta
 						yaw_reset = -atan(obst_to_goal/(distance_from_obstacle*tan(z_now - z_obst))); //deve ruotare per riposizionarsi verso la testa
 						z_step = z_now - z_obst;
 
 					} else {       //ho evitato l'ostacolo ---> setto was_obstacle=false e is_obstacle=false in modo che potrò riprendere il normale funzionamento
+#ifdef DEBUG
 						ROS_INFO("Ho evitato l'ostacolo");
+#endif
 						base_vel.linear.x= 0.0;   //fermo il robot
 						//yaw_reset = -atan(obst_to_goal/(distance_from_obstacle*tan(z_now - z_obst))); //deve ruotare per riposizionarsi verso la testa
 						if((abs(z_now - z_obst) > abs(1.57 - abs(yaw_reset))) && (((z_now - z_obst) * (yaw_reset)) > 0.0)) {

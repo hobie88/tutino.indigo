@@ -41,6 +41,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/CameraInfo.h>
 //#include <image_transport/image_transport.h>
 //#include <qbo_face_msgs/RecognizeFace.h>
 //#include <qbo_face_msgs/GetName.h>
@@ -90,6 +91,7 @@ private:
 
 	ros::Subscriber image_sub_;
 	ros::Subscriber joint_states_sub_;
+	ros::Subscriber info_sub_;
 
 //	ros::Publisher face_position_and_size_pub_;
 //	ros::Publisher face_pub_;
