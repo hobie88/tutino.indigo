@@ -62,6 +62,7 @@ def record(recog):
 
 def recognizeAudio(recog):
     global audioQueue
+    global stringList
     while recogFlag:
         
         if len(audioQueue) > 0:
@@ -81,6 +82,7 @@ def recognizeAudio(recog):
                 decodedString = ""
             if decodedString:
                 stringList.append(decodedString)    #Store decoded Strings into a list
+                print("decoded: "+str(decodedString))
             cmd = analyze(decodedString)    #If decoded String is meaningful
             pub.publish(cmd)
             

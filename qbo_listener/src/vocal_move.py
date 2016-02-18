@@ -98,7 +98,7 @@ def vocal_movement():
     rospy.init_node('vocal_move', anonymous = True)
     rospy.Subscriber('qbo_arduqbo/my_odom', Point32, odom_callback)
     rospy.Subscriber('vocal_move', String, vocal_move_callback) 
-    rospy.loginfo("subscriber subscribed")
+    #rospy.loginfo("subscriber subscribed")
     rospy.spin()
  
 if __name__ == '__main__':
