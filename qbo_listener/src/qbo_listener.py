@@ -16,10 +16,9 @@ import wave
 import speech_recognition as sr
 import time
 from collections import  deque
-import threading
+#import threading
+import thread
 import signal
-import sys
-from gi.overrides.Gdk import Color
 
 
 THRESHOLD = 500
@@ -164,6 +163,14 @@ if __name__ == "__main__":
         r.adjust_for_ambient_noise(source,2)
         print("Adjustment Done!")
     #startTime = time.time()
+    thread.start_new_thread(record,(r,))
+    while True:
+        try:
+            recognizeAudio(r)
+        except KeyboardInterrupt:
+            sys.exit(0)
+            
+    '''
     recordThread = threading.Thread(target=record, args=(r,))
     recordThread.start()
     recognizerThread = threading.Thread(target=recognizeAudio, args=(r,))
@@ -171,4 +178,4 @@ if __name__ == "__main__":
     stopAllThread = threading.Thread(target=stopAll)
     stopAllThread.start()
     signal.signal(signal.SIGINT, sys.exit(0))
-    
+    '''
