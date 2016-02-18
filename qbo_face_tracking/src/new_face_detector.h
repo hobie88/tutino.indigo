@@ -159,6 +159,7 @@ private:
 	 */
 
 	//ROS Callbacks
+    void infoCallback(const sensor_msgs::CameraInfo::ConstPtr& info);
 	void imageCallback(const sensor_msgs::Image::ConstPtr& image_ptr);
 	void jointStateCallback(const sensor_msgs::JointStateConstPtr& joint_state);
 	//Initialization methods
