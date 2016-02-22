@@ -73,7 +73,7 @@ class QboCam:
     def close(self, signal, frame):
         self.cap.release()
         cv2.destroyAllWindows() 
-        rospy.shutdown()
+        #rospy.signal_shutdown() #not needed
         sys.exit(0)
         
 

@@ -1,0 +1,4 @@
+<launch>
+	<node name="telepathy" pkg="qbo_telepathy" type="telepathy.py" output="screen">
+	</node>
+</launch>

@@ -5,11 +5,12 @@
     <include file="$(find qbo_arduqbo)/launch/qbo_arduqbo_default.launch" /> 
 <!--    <node pkg="qbo_talk" name="qbo_talk" type="neo_talk.py" output="screen"/> -->
 <!--    <node pkg="qbo_brain"  name="qbo_brain"      type="qbo_brain.py" output="screen" /> -->
-	<include file="$(find qbo_face_tracking)/launch/qbo_face_tracking.launch" />
+<!--	<include file="$(find qbo_face_tracking)/launch/qbo_face_tracking.launch" /> -->
 	<include file="$(find qbo_cam)/launch/qbo_cam_default.launch" />
-	<include file="$(find qbo_listener)/launch/qbo_launcher.launch" />
-	<include file="$(find qbo_move)/launch/qbo_move.launch" />
+<!--	<include file="$(find qbo_listener)/launch/qbo_launcher.launch" /> -->
+<!--	<include file="$(find qbo_move)/launch/qbo_move.launch" /> -->
 	<include file="$(find qbo_telepathy)/launch/qbo_telepathy.launch" />
+	<node pkg="qbo_video_streamer" name="video_streamer" type="mjpeg.py" output="screen" />
 
 
 </launch>

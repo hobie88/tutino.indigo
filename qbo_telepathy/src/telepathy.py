@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import time
+import signal
 # ROS import
 import ros
 import rospy
@@ -27,6 +28,7 @@ class Telepathy(object):    #Required for classes employing decorators
         Its properties are defined as follows: getters tries to get the value from the Http-retrieved JSON.
                                                 setters copy the value directly to the msg(stored inside self.msgs)
         '''
+        
         self.timeThreshold = time.time()
         self.request = urllib2.Request(providerPath + fileName, headers=headerReq)
         self.pubs = {"body":rospy.Publisher("/cmd_vel",Twist,queue_size=2),
@@ -145,12 +147,12 @@ class Telepathy(object):    #Required for classes employing decorators
         self.data = self.data.read()
         try:
             self.data = json.loads(self.data)
-        except:
+        except ValueError:
             print("JSON Decoding failed")
-            pass
+           # pass
         #DEBUG
-        for key in self.data:
-            print("%s -> %s" %(key,self.data[key]))
+        #for key in self.data:
+        #    print("%s -> %s" %(key,self.data[key]))
         
     
     def getValues(self,key):
@@ -167,7 +169,7 @@ class Telepathy(object):    #Required for classes employing decorators
         '''
         Publish all the msg inside self.msgs using Publishers inside self.pubs
         '''
-        print("Publishing") #DEBUG
+        #print("Publishing") #DEBUG
         for key in self.pubs:
             if "head" in key:
                 self.pubs[key].header = rospy.get_rostime()
@@ -176,30 +178,35 @@ class Telepathy(object):    #Required for classes employing decorators
             except:
                 print("Error occurred when trying to publish %s" %key)
         
+        
+
+def close():
+    sys.exit(0)
+
 
 if __name__ == '__main__':
-    try:
-        rospy.init_node("telepathy", anonymous=True)
-        #Initialize class
-        qboSkill = Telepathy()
-        #Handle class
-        while True:
-            try:
-                qboSkill.retrieveData()
-            except: #In case it goes wrong, restarts execution until it goes right
-                print("RetrieveData failed! Trying again...")
-                continue
-            #Get data from JSON-decoded attribute
-            qboSkill.x = qboSkill.x
-            qboSkill.z = qboSkill.z
-            qboSkill.headJoints = qboSkill.headJoints
-            qboSkill.noseColor = qboSkill.noseColor
-            qboSkill.lastTime = qboSkill.lastTime
-            #Publish
-            qboSkill.publishMsgs()
-
+    signal.signal(signal.SIGINT, close) #to close properly the node
+    rospy.init_node("telepathy", anonymous=True)
+    #Initialize class
+    qboSkill = Telepathy()
+    #Handle class
+    while True:
+        
+        try:
+            qboSkill.retrieveData()
+        except ValueError: #In case it goes wrong, restarts execution until it goes right
+            print("RetrieveData failed! Trying again...")
+            continue
+        except KeyboardInterrupt:
+            sys.exit(0)
             
-            #Publish Msgs
-    except rospy.ROSInterruptException:
-        pass
+        #Get data from JSON-decoded attribute
+        qboSkill.x = qboSkill.x
+        qboSkill.z = qboSkill.z
+        qboSkill.headJoints = qboSkill.headJoints
+        qboSkill.noseColor = qboSkill.noseColor
+        qboSkill.lastTime = qboSkill.lastTime
+        #Publish
+        qboSkill.publishMsgs()
+
 
