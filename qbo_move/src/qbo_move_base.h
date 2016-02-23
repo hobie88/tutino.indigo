@@ -68,6 +68,8 @@ private:
 	void putOrthogonal(float teta);
 	float controlPID(float x, float ix, float dx, float Kp, float Ki, float Kd);
 
+	void safePublish(geometry_msgs::Twist);
+
 	bool is_obstacle;                                //ostacolo visto da entrambi i sensori a ultrasuoni
 	bool was_obstacle;                               //non c'è ostacolo ma c'era fino alla iterazione precedente
 	bool right_obstacle;                             //il sensore destro vede un ostacolo
@@ -118,6 +120,9 @@ private:
 	bool half_step;
 	float well_threshold;
 	float hill_threshold;
+	float left_sensor_;
+	float right_sensor_;
+	float floor_sensor_;
 
 
 public:

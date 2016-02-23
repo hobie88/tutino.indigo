@@ -20,6 +20,7 @@ from collections import  deque
 #import threading
 import thread
 import signal
+import os
 
 
 THRESHOLD = 500
@@ -169,5 +170,8 @@ class listener(object):
    
     
 if __name__ == "__main__":
+    #system cannot start jack server autonoumously
+    os.system("pulseaudio --kill")
+    os.system("jack_control start")
     a = listener()
     signal.signal(signal.SIGINT, sys.exit(0))

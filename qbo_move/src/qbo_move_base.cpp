@@ -85,6 +85,11 @@ void MoveBase::onInit()
 
 }
 
+template <typename T> int sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+
 //la funzione checkOtherSensor verrà chiamata sia nella callback del sensore destro sia nella callback del sensore sinistro (sia per vedere se c'è un
 //ostacolo visto da entrambi i sensori sia per vedere se nessuno dei due sensori vede un ostacolo): viene chiamata in entrambe le callback perché non
 //so quale delle due callback viene chiamata per prima, quindi se viene chiamata prima la callback del sensore di destra quando questa callback
@@ -209,6 +214,7 @@ void MoveBase::twistCallback(const geometry_msgs::TwistConstPtr& twist_vel)
 void MoveBase::floorSensorCallback(const sensor_msgs::PointCloudConstPtr& floor_sensor)
 {
 	float floor_sensor_measure = floor_sensor->points[0].x;
+	floor_sensor_ = floor_sensor->points[0].x;
 	geometry_msgs::Twist base_vel;
 	if((floor_sensor_measure < hill_threshold) || (floor_sensor_measure > well_threshold)) {
 #ifdef DEBUG
@@ -227,7 +233,8 @@ void MoveBase::floorSensorCallback(const sensor_msgs::PointCloudConstPtr& floor_
 		left_obstacle = false;
 		rotation = "right_rotation";
 		rotation_right_left = true;
-		base_control_pub_.publish(base_vel);
+		safePublish(base_vel);
+		//base_control_pub_.publish(base_vel);
 	} else {
 		floor_obstacle = false;
 	}
@@ -238,6 +245,7 @@ void MoveBase::floorSensorCallback(const sensor_msgs::PointCloudConstPtr& floor_
 void MoveBase::rightSensorCallback(const sensor_msgs::PointCloudConstPtr& right_sensor)
 {
 	//ROS_ERROR("Chiamata la rightSensorCallback");
+	right_sensor_ = right_sensor->points[0].x;
 	mutex.lock();
 
 	if(!floor_obstacle) {
@@ -270,6 +278,7 @@ void MoveBase::rightSensorCallback(const sensor_msgs::PointCloudConstPtr& right_
 void MoveBase::leftSensorCallback(const sensor_msgs::PointCloudConstPtr& left_sensor)
 {
 	//ROS_ERROR("Chiamata la leftSensorCallback");
+	left_sensor_=left_sensor->points[0].x;
 	mutex.lock();
 
 	if(!floor_obstacle) {
@@ -486,7 +495,8 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 			}
 		}
 		//publish
-		base_control_pub_.publish(base_vel);
+		safePublish(base_vel);
+		//base_control_pub_.publish(base_vel);
 
 		mutex.unlock();
 		//ROS_ERROR("wheel callbacj mutex unlock");
@@ -497,7 +507,8 @@ void MoveBase::putOrthogonal(float teta) {
 	geometry_msgs::Twist base_vel;
 	base_vel.linear.x = 0.0;
 	base_vel.angular.z = controlPID(0, 0, teta, kp_yaw_, ki_yaw_, kd_yaw_);
-	base_control_pub_.publish(base_vel);
+	safePublish(base_vel);
+	//base_control_pub_.publish(base_vel);
 }
 
 
@@ -516,6 +527,29 @@ float MoveBase::controlPID(float x, float ix, float dx, float Kp, float Ki, floa
 	}
 	return result;
 }
+
+void MoveBase::safePublish(geometry_msgs::Twist msg)
+{
+	if((left_sensor_>0.1 || left_sensor_==0) && (right_sensor_>0.1 || right_sensor_==0) && (floor_sensor_>0.15))
+			{
+				if (std::abs(msg.linear.x)>1.0)
+				{
+					msg.linear.x=sgn(msg.linear.x)*1.0;
+				}
+				if (std::abs(msg.angular.z)>1.0)
+				{
+					msg.angular.z=sgn(msg.angular.z)*1.0;
+				}
+
+				base_control_pub_.publish(msg);
+			}
+	else
+	{
+		msg.linear.x=0.0;
+		base_control_pub_.publish(msg);
+	}
+}
+
 
 int main(int argc, char **argv)
 {
