@@ -530,7 +530,7 @@ float MoveBase::controlPID(float x, float ix, float dx, float Kp, float Ki, floa
 
 void MoveBase::safePublish(geometry_msgs::Twist msg)
 {
-	if((left_sensor_>0.2 || left_sensor_==0) && (right_sensor_>0.2 || right_sensor_==0) && (floor_sensor_>0.16))
+	if((left_sensor_>0.1 || left_sensor_==0) && (right_sensor_>0.1 || right_sensor_==0) && (floor_sensor_>0.15))
 			{
 				if (std::abs(msg.linear.x)>1.0)
 				{
@@ -543,6 +543,11 @@ void MoveBase::safePublish(geometry_msgs::Twist msg)
 
 				base_control_pub_.publish(msg);
 			}
+	else
+	{
+		msg.linear.x=0.0;
+		base_control_pub_.publish(msg);
+	}
 }
 
 
