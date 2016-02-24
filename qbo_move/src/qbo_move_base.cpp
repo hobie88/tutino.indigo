@@ -94,9 +94,12 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 	if(semaforo == false) {
 		if(obstacle == 1) {                  //uno dei due sensori ha visto l'ostacolo
 			if(other == "right") {
+				ROS_INFO("Il sensore di destra ha visto un ostacolo");
 				if(left_obstacle == true) {    //anche l'altro sensore ha visto l'ostacolo
+					ROS_INFO("Controllando risulta che il sensore di sinistra pure aveva visto l'ostacolo");
 					is_obstacle = true;
 					if(was_obstacle == false) {
+						ROS_INFO("Prima l'ostacolo non c'era, adesso c'è");
 						difference_distance = right_distance - left_distance;
 						teta = tan(difference_distance/sensor_distance);
 						if((teta > 0.5) && (completed == true)) {
@@ -111,9 +114,12 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 					}
 				}
 			} else if(other == "left") {
+				ROS_INFO("Il sensore di sinistra ha visto un ostacolo");
 				if(right_obstacle == true) {    //anche l'altro sensore ha visto l'ostacolo
+					ROS_INFO("Controllando risulta che il sensore di destra pure aveva visto l'ostacolo");
 					is_obstacle = true;
 					if(was_obstacle == false) {
+						ROS_INFO("Prima l'ostacolo non c'era, adesso c'è");
 						difference_distance = right_distance - left_distance;
 						teta = tan(difference_distance/sensor_distance);
 						if((teta > 0.5) && (completed == true)) {
@@ -129,8 +135,10 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 			}
 		} else if ((rotation == "right_rotation") && (sensor_cycle == 0.0)) {        //uno dei due sensori non vede più l'ostacolo (che aveva visto fino alla chiamata precedente)
 			if(other == "right") {
+				ROS_INFO("Sono in right_rotation, e il sensore di destra non vede più l'ostacolo");
 				//left_obstacle = false;   //buttare: ho forzato lo spegnimento del sensore sinistro
 				if(left_obstacle == false) {//anche l'altro sensore non vede più l'ostacolo ---> non c'è più l'ostacolo (commentata perché ostacolo vicino)
+					ROS_INFO("Sono in right_rotation, e anche il sensore di sinistra non vede più l'ostacolo");
 					is_obstacle = false;
 					rotation_check = true;
 					route1 = distance_from_obstacle/(cos(abs(z_step)));   //distanza da percorrere in linea retta per evitare l'ostacolo (provengo da una situazione di ostacolo, è implicito nel fatto che sono dentro questa funzione)
@@ -158,7 +166,9 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 			}
 		} else if (rotation == "left_rotation") {                           //uno dei due sensori non vede più l'ostacolo (che aveva visto fino alla chiamata precedente)
 			if(other == "right") {
+				ROS_INFO("Sono in left_rotation, e il sensore di sinistra non vede più l'ostacolo");
 				if(left_obstacle == false) {//anche l'altro sensore non vede più l'ostacolo ---> non c'è più l'ostacolo (commentata perché ostacolo vicino)
+					ROS_INFO("Sono in left_rotation, e anche il sensore di destra non vede più l'ostacolo");
 					is_obstacle = false;
 					route2 = distance_from_obstacle/(abs(cos(z_step)));   //distanza da percorrere in linea retta per evitare l'ostacolo (provengo da una situazione di ostacolo, è implicito nel fatto che sono dentro questa funzione)
 					rotation = "right_rotation";
@@ -328,8 +338,10 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 					if(((z_step <= 1.57) && (z_step >= -1.57)) || half_step) {   //1,57 radianti (90°) è l'angolo oltre il quale non considero più l'ostacolo come presente
 						base_vel.linear.x = 0;
 						if(rotation_right_left == true) {
+							ROS_INFO("Giro a destra per vedere il punto in cui finisce l'ostacolo");
 							base_vel.angular.z = -controlPID(0, 0, 1.3, kp_yaw_, ki_yaw_, kd_yaw_);
 						} else {
+							ROS_INFO("Giro a sinistra per vedere il punto in cui finisce l'ostacolo");
 							base_vel.angular.z = controlPID(0, 0, 1.7, kp_yaw_, ki_yaw_, kd_yaw_);
 							half_step = false;
 						}
@@ -467,6 +479,7 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 }
 
 void MoveBase::putOrthogonal(float teta) {
+	ROS_INFO("Mi metto perpendicolare all'ostacolo");
 	geometry_msgs::Twist base_vel;
 	base_vel.linear.x = 0.0;
 	base_vel.angular.z = controlPID(0, 0, teta, kp_yaw_, ki_yaw_, kd_yaw_);
