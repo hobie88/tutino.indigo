@@ -96,7 +96,7 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 			if(other == "right") {
 				ROS_INFO("Il sensore di destra ha visto un ostacolo");
 				if(left_obstacle == true) {    //anche l'altro sensore ha visto l'ostacolo
-					ROS_INFO("Controllando risulta che il sensore di sinistra pure aveva visto l'ostacolo");
+					//ROS_INFO("Controllando risulta che il sensore di sinistra pure aveva visto l'ostacolo");
 					is_obstacle = true;
 					if(was_obstacle == false) {
 						ROS_INFO("Prima l'ostacolo non c'era, adesso c'è");
@@ -116,7 +116,7 @@ void MoveBase::checkOtherSensor(int obstacle, string other) {
 			} else if(other == "left") {
 				ROS_INFO("Il sensore di sinistra ha visto un ostacolo");
 				if(right_obstacle == true) {    //anche l'altro sensore ha visto l'ostacolo
-					ROS_INFO("Controllando risulta che il sensore di destra pure aveva visto l'ostacolo");
+					//ROS_INFO("Controllando risulta che il sensore di destra pure aveva visto l'ostacolo");
 					is_obstacle = true;
 					if(was_obstacle == false) {
 						ROS_INFO("Prima l'ostacolo non c'era, adesso c'è");
@@ -394,6 +394,7 @@ void MoveBase::wheelCallback(const geometry_msgs::Point32ConstPtr& wheel_pos)
 		} else {            //se NON c'è ostacolo
 			if(!was_obstacle) {   //se non c'è ostacolo e non c'era neanche prima vuol dire che sono nella situazione normale di funzionamento ----> faccio
 								  //solo da passacarte per la velocità da spedire calcolata secondo i criteri soliti da altri nodi
+				ROS_INFO("Faccio solo da passacarte");
 				if(flag){
 					flag_distance = obst_to_goal/(sin(abs(yaw_reset)));
 					if(((y_now - y_flag_prev)*(y_now - y_flag_prev) + (x_now - x_flag_prev)*(x_now - x_flag_prev)) < ((flag_distance-OBSTACLE_DISTANCE-0.1)*(flag_distance-OBSTACLE_DISTANCE-0.1))) {
